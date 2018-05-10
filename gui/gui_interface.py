@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL,QTimer
 from multiprocessing import Pipe, Process
 from .frontend import *
-from .frontend.toad_gui import Ui_main_window
+from .frontend.main_window import Ui_MainWindow
 from .packets import *
 import sys
 import os
@@ -43,7 +43,7 @@ class MainThd(QThread):
                     self.usb_pipe.send(new_packet_window)
 
 
-class gcs_main_window(QtGui.QMainWindow, Ui_main_window):
+class gcs_main_window(QtGui.QMainWindow, Ui_MainWindow):
     """Inherit main window generated in QT4 Designer"""
     def __init__(self, usb_pipe, parent=None):
 
@@ -76,6 +76,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_main_window):
 
 def run(usb_pipe, gui_exit):
     app = QtGui.QApplication(sys.argv)
+    app.setWindowIcon(QtGui.QIcon('icon.png'))
     main_window = gcs_main_window(usb_pipe)
     main_window.show()
     app.exec_()

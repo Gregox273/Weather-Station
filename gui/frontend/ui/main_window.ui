@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>577</width>
+    <height>456</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="main_tab_widget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>551</width>
+      <height>371</height>
+     </rect>
+    </property>
+    <property name="tabPosition">
+     <enum>QTabWidget::West</enum>
+    </property>
+    <property name="tabShape">
+     <enum>QTabWidget::Rounded</enum>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tabLive_view">
+     <attribute name="title">
+      <string>Live View</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="tabHistoric_view">
+     <attribute name="title">
+      <string>Historic View</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="tabTerminal">
+     <attribute name="title">
+      <string>Terminal</string>
+     </attribute>
+     <widget class="QTextBrowser" name="textBrowserTerminal">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>70</y>
+        <width>256</width>
+        <height>192</height>
+       </rect>
+      </property>
+      <property name="openLinks">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>577</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSerial">
+    <property name="title">
+     <string>Serial</string>
+    </property>
+    <addaction name="actionConnect"/>
+    <addaction name="separator"/>
+    <addaction name="actionLive_Sensor_Data"/>
+    <addaction name="actionDownload_from_SD"/>
+   </widget>
+   <addaction name="menuSerial"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionConnect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionLive_Sensor_Data">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Display Live Sensor Data</string>
+   </property>
+  </action>
+  <action name="actionDownload_from_SD">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Download Data from SD</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

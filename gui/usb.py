@@ -14,7 +14,7 @@ def run(gui_pipe, log_pipe, gui_exit):
     # Process arguments
     parser = argparse.ArgumentParser(description= \
         'Connect to weather station on given serial port (default /dev/ttyACM0)')
-    parser.add_argument('--port', dest='port', type=string, nargs='?', \
+    parser.add_argument('--port', dest='port', type=str, nargs='?', \
         default='/dev/ttyACM0', help='Serial port to use')
 
     args = parser.parse_args()

@@ -4,6 +4,7 @@ Gregory Brooks, Matt Coates 2018"""
 import struct
 from PyQt4 import QtCore,QtGui
 import json
+import datetime
 
 PCKT_LEN = 128  # Number of bytes in a packet
 
@@ -11,6 +12,11 @@ class Packet(object):
     """Weather Station Packet, contains snapshot of all sensor readings"""
     def __init__(self, input_struct=bytes(PCKT_LEN)):
         self.data_struct = input_struct
+        meta_data = struct.unpack('<I', self.data_struct[0:4])
+        self.timestamp = meta_data[0] # Seconds (UNIX), 4 byte uint
+        self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
+            strftime('%H:%M:%S %d-%m-%Y')
+
 
         # Get Message Metadata
         # meta_data = struct.unpack('<BBI', self.data_struct[0:6])
@@ -22,9 +28,9 @@ class Packet(object):
 
     def printout(self,textbox):
         # Method to print packet to terminal within the GUI
-#         textbox.moveCursor(QtGui.QTextCursor.End)
-#         textbox.ensureCursorVisible()
-#         textbox.insertPlainText("Log type: {}\n".format(self.log_type))
+         textbox.moveCursor(QtGui.QTextCursor.End)
+         textbox.ensureCursorVisible()
+         textbox.insertPlainText("Timestamp: {}\n".format(self.time_date))
 #         textbox.insertPlainText("Toad ID: {}\n".format(self.toad_id))
 #         textbox.insertPlainText("Systicks: {}\n".format(self.systick))
 
