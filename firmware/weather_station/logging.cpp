@@ -5,6 +5,7 @@
 
 File logFile;
 
+/* Setup SD Card */
 void logging_setup(uint8_t cs_pin) {
 
     tx_flag = false;
@@ -17,7 +18,7 @@ void logging_setup(uint8_t cs_pin) {
 }
 
 
-
+/* Log Data Packet */
 void log_data(uint8_t id, uint8_t* buff, uint8_t len){
   
     uint8_t timestamp;
@@ -44,6 +45,8 @@ void log_data(uint8_t id, uint8_t* buff, uint8_t len){
     }
 }
 
+
+/* Dump SD Card */
 void dump_sd(void) {
   
     logFile = SD.open("log.bin", FILE_READ);

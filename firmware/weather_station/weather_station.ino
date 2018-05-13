@@ -1,5 +1,6 @@
 #include "commands.h"
 #include "logging.h"
+#include "analog_sensors.h"
 
 /* State Machine Definitions */
 typedef enum {
@@ -79,11 +80,11 @@ static state_t do_state_idle(void){
 /* Read Temperature Sensor State */
 static state_t read_sensor_temp(void){
   
-    Serial.println("Entering TEMP State");
+    //Serial.println("Entering TEMP State");
     
-    uint8_t dat[5] = {0x34, 0x33, 0x34, 0x36, 0x34};    
-    log_data(ID_TEMP, dat, 5);
-    
+    /* Take Measurement */
+    log_analog_reading(ID_TEMP, TEMP_PIN);
+        
     return STATE_UV;
 }
 
@@ -93,6 +94,9 @@ static state_t read_sensor_uv(void){
   
     //Serial.println("Entering UV State");
     
+    /* Take Measurement */
+    log_analog_reading(ID_UV, UV_PIN);
+    
     return STATE_LIGHT;
 }
 
@@ -101,6 +105,9 @@ static state_t read_sensor_uv(void){
 static state_t read_sensor_light(void){
   
     //Serial.println("Entering LIGHT State");
+
+    /* Take Measurement */
+    log_analog_reading(ID_LIGHT, LIGHT_PIN);
     
     return STATE_GAS;
 }
@@ -110,6 +117,9 @@ static state_t read_sensor_light(void){
 static state_t read_sensor_gas(void){
   
     //Serial.println("Entering GAS State");
+
+    /* Take Measurement */
+    log_analog_reading(ID_GAS, AIR_PIN);
     
     return STATE_WIND;
 }
