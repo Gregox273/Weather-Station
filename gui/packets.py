@@ -68,9 +68,9 @@ class GPS_Packet(object):
         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
             strftime('%H:%M:%S %d-%m-%Y')
         self.id = meta_data[1]
-        self.latitude = meta_data[2]
-        self.longitude = meta_data[3]
-        self.height = meta_data[4]
+        self.latitude = meta_data[2]/10000000   # Degrees
+        self.longitude = meta_data[3]/10000000  # Degrees
+        self.height = meta_data[4]/1000         # metres
         self.gps_time = meta_data[5]
         self.gps_time_date = datetime.datetime.fromtimestamp(self.gps_time).\
             strftime('%H:%M:%S %d-%m-%Y')
