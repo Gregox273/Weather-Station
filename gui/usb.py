@@ -36,9 +36,15 @@ def run(gui_pipe, log_pipe, gui_exit):
 
         if ser.is_open:
             # Read in a packet
-            if ser.in_waiting>=PCKT_LEN:
-                data = ser.read(PCKT_LEN)
+            if ser.in_waiting>=min(PCKT_LEN):
+                # Check ID
+                data = ser.read(ID_POSITION+1)
+                id = data[ID_POSITION]
+                data += ser.read(PCKT_LEN[id] - ID_POSITION - 1)
 
                 # Handle message
-                message = Packet(data)
+                if id == Identifier.GPS:
+                    message = GPS_Packet(data)
+                else:
+                    message = Packet(data)
                 gui_pipe.send(message)
