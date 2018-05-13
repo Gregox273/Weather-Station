@@ -26,6 +26,9 @@ def run():
     # Duplex pipe between usb and gui processes
     usb_gui_pipe,gui_usb_pipe = multiprocessing.Pipe(True)
 
+    # Duplex pipe between logging and gui processes
+    log_gui_pipe,gui_log_pipe = multiprocessing.Pipe(True)
+
     ############################################################################
     # Define and start processes
     ############################################################################
@@ -34,7 +37,7 @@ def run():
 
     print("Starting processes...")
     # Start gui/main process
-    gui_process = multiprocessing.Process(target=gui_interface.run, args=(gui_usb_pipe, gui_exit))
+    gui_process = multiprocessing.Process(target=gui_interface.run, args=(gui_usb_pipe, gui_log_pipe, gui_exit))
     gui_process.start()
 
     # Start logging process
