@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>WeatherStation</class>
+ <widget class="QMainWindow" name="WeatherStation">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>971</width>
-    <height>599</height>
+    <width>606</width>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Weather Station -gb510, mc955</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -19,8 +19,8 @@
      <widget class="QTabWidget" name="main_tab_widget">
       <property name="minimumSize">
        <size>
-        <width>250</width>
-        <height>100</height>
+        <width>300</width>
+        <height>300</height>
        </size>
       </property>
       <property name="tabPosition">
@@ -30,28 +30,54 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabLive_view">
        <attribute name="title">
         <string>Live View</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QScrollArea" name="scrollArea">
-          <property name="widgetResizable">
-           <bool>true</bool>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="1" column="0">
+         <widget class="PlotWidget" name="graphicsViewUV_L">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>900</width>
-             <height>510</height>
-            </rect>
-           </property>
-          </widget>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="PlotWidget" name="graphicsViewWind_L">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="PlotWidget" name="graphicsViewLight_L">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="PlotWidget" name="graphicsViewTemp_L">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
          </widget>
         </item>
        </layout>
@@ -60,22 +86,48 @@
        <attribute name="title">
         <string>Historic View</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QScrollArea" name="scrollArea_2">
-          <property name="widgetResizable">
-           <bool>true</bool>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="PlotWidget" name="graphicsViewTemp_H">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
           </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents_2">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>900</width>
-             <height>510</height>
-            </rect>
-           </property>
-          </widget>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="PlotWidget" name="graphicsViewWind_H">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="PlotWidget" name="graphicsViewUV_H">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="PlotWidget" name="graphicsViewLight_H">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
          </widget>
         </item>
        </layout>
@@ -109,7 +161,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>971</width>
+     <width>606</width>
      <height>25</height>
     </rect>
    </property>
@@ -156,6 +208,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

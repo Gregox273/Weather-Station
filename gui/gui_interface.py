@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL,QTimer
 from multiprocessing import Pipe, Process
 from .frontend import *
-from .frontend.main_window import Ui_MainWindow
+from .frontend.main_window import Ui_WeatherStation
 from .packets import *
 import sys
 import os
@@ -45,7 +45,7 @@ class MainThd(QThread):
                     self.usb_pipe.send(new_packet_window)
 
 
-class gcs_main_window(QtGui.QMainWindow, Ui_MainWindow):
+class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     """Inherit main window generated in QT4 Designer"""
     def __init__(self, usb_pipe, log_pipe, parent=None):
 
@@ -55,6 +55,9 @@ class gcs_main_window(QtGui.QMainWindow, Ui_MainWindow):
         pg.setConfigOptions(antialias=True)
 
         # Add slots and signals manually
+
+        # Configure plots
+        self.graphicsViewTemp_L.plot([100,101,102],[200,210,220],title="Temperature")  
 
         # Start update thread
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
