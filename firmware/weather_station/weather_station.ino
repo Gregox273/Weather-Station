@@ -1,3 +1,4 @@
+#include "wind.h"
 #include "commands.h"
 #include "logging.h"
 #include "analog_sensors.h"
@@ -129,6 +130,9 @@ static state_t read_sensor_gas(void){
 static state_t read_sensor_wind(void){
   
     //Serial.println("Entering WIND State");
+
+    /* Take Measurement */
+    log_wind_reading();
     
     return STATE_GPS;
 }
