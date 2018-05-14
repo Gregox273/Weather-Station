@@ -5,8 +5,8 @@
 
 /* State Machine Definitions */
 typedef enum {
-    STATE_IDLE=0, STATE_TEMP, STATE_UV, STATE_LIGHT, STATE_GAS,
-    STATE_WIND, STATE_GPS, NUM_STATES
+    STATE_IDLE=0, STATE_TEMP, STATE_UV, STATE_LIGHT,
+    STATE_WIND, NUM_STATES
 } state_t;
 
 typedef state_t state_func_t(void);
@@ -17,14 +17,12 @@ static state_t do_state_idle(void);
 static state_t read_sensor_temp(void);
 static state_t read_sensor_uv(void);
 static state_t read_sensor_light(void);
-static state_t read_sensor_gas(void);
 static state_t read_sensor_wind(void);
-static state_t read_sensor_gps(void);
 
 /* State Table */
 state_func_t* const state_table[NUM_STATES] = {
     do_state_idle, read_sensor_temp, read_sensor_uv, read_sensor_light,
-    read_sensor_gas, read_sensor_wind, read_sensor_gps
+    read_sensor_wind
 };
 
 /* State Table Lookup */
@@ -110,18 +108,6 @@ static state_t read_sensor_light(void){
     /* Take Measurement */
     log_analog_reading(ID_LIGHT, LIGHT_PIN);
     
-    return STATE_GAS;
-}
-
-
-/* Read Gas Sensor State */
-static state_t read_sensor_gas(void){
-  
-    //Serial.println("Entering GAS State");
-
-    /* Take Measurement */
-    log_analog_reading(ID_GAS, AIR_PIN);
-    
     return STATE_WIND;
 }
 
@@ -133,15 +119,6 @@ static state_t read_sensor_wind(void){
 
     /* Take Measurement */
     log_wind_reading();
-    
-    return STATE_GPS;
-}
-
-
-/* Read GPS State */
-static state_t read_sensor_gps(void){
-  
-    //Serial.println("Entering GPS State");
     
     return STATE_IDLE;
 }

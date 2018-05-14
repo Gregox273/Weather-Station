@@ -5,7 +5,6 @@
 #define TEMP_PIN    0
 #define UV_PIN      1
 #define LIGHT_PIN   2
-#define AIR_PIN     3
 
 void log_analog_reading(uint8_t id, uint8_t pin);
 

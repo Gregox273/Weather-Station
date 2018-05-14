@@ -3,7 +3,7 @@
 #include "logging.h"
 #include "FreqCounter.h"
 
-/* N.B. Connect Sensor to Pin 5 */
+/* N.B. Connect HE Sensor to Pin 5 */
 
 /* Measure and Log Frequency */
 void log_wind_reading(void) {
