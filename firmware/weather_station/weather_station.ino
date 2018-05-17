@@ -43,6 +43,9 @@ void setup() {
 
     /* Setup SD Card */
     logging_setup(10);
+
+    /* Enable Pullup */
+    pinMode(5, INPUT_PULLUP);
 }
 
 
