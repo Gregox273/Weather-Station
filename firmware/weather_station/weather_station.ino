@@ -49,9 +49,6 @@ void setup() {
     /* Enable Pullup on Hall Effect */
     pinMode(5, INPUT_PULLUP);
 
-    /* Measure VCC */
-    log_Vcc();
-
     /* Setup RTC */
     rtc_setup();
 }

@@ -10,7 +10,7 @@
 #define ID_WIND         0x20
 #define ID_VCC          0x40
 
-/* Event Bytes */
+/* Event Id Bytes */
 #define RTC_ERROR       0x80
 #define RTC_UPDATE      0x81
 #define IDLE_UPDATE     0x82
