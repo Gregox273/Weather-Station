@@ -25,7 +25,13 @@ void log_analog_reading(uint8_t id, uint8_t pin) {
     reading[0] = (uint8_t)(result & 0xFF);
     reading[1] = (uint8_t)((result >> 8) & 0xFF);    
     log_data(id, reading, 2);
-}
+
+    /* Debug */
+    //Serial.print("adc ");
+    //Serial.print(pin);
+    //Serial.print(" = ");
+    //Serial.println(result);
+} 
 
 
 /* Logs Supply Voltage in mV */

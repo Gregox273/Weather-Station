@@ -16,7 +16,7 @@ void rtc_setup(void) {
   }
 
   /* Update RTC with Compile Time */
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 }
 
 
