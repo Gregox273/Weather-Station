@@ -25,17 +25,11 @@ void log_analog_reading(uint8_t id, uint8_t pin) {
     reading[0] = (uint8_t)(result & 0xFF);
     reading[1] = (uint8_t)((result >> 8) & 0xFF);    
     log_data(id, reading, 2);
-
-    /* Debug */
-    Serial.print("ADC ");
-    Serial.print(pin);
-    Serial.print(" = ");
-    Serial.println(result);
 }
 
 
 /* Logs Supply Voltage in mV */
-void logVcc() {
+void log_Vcc() {
   
     const int num_avg = 20;
     long result[num_avg];
@@ -71,8 +65,4 @@ void logVcc() {
     data[0] = (uint8_t)(supply & 0xFF);
     data[1] = (uint8_t)((supply >> 8) & 0xFF);    
     log_data(ID_VCC, data, 2);
-  
-    /* Debug */
-    Serial.print("VCC = ");
-    Serial.println(supply);
 }

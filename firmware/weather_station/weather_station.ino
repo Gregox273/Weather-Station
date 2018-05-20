@@ -50,7 +50,7 @@ void setup() {
     pinMode(5, INPUT_PULLUP);
 
     /* Measure VCC */
-    logVcc();
+    log_Vcc();
 
     /* Setup RTC */
     rtc_setup();
@@ -79,7 +79,7 @@ void loop() {
 static state_t do_state_idle(void){
 
     /* Measure VCC */
-    logVcc();
+    log_Vcc();
   
     /* Sleep */
     delay(idle_time);

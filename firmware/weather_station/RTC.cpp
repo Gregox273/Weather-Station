@@ -6,13 +6,12 @@
 
 RTC_DS1307 rtc;
 
-
 /* Setup RTC */
 void rtc_setup(void) {
 
   /* Init RTC */
   if (! rtc.begin()) {
-    Serial.println("RTC Not Found!");
+    log_event(RTC_ERROR);
     while (1);
   }
 
@@ -25,9 +24,6 @@ void rtc_setup(void) {
 uint32_t get_timestamp(void) {
   
     DateTime now = rtc.now();
-  
-    /* Debug */
-    Serial.println(now.unixtime());
     
     return now.unixtime();
 }
@@ -37,5 +33,7 @@ uint32_t get_timestamp(void) {
 void set_time(uint32_t current_time) {
 
     /* Set Time from UNIX Timestamp */
-    rtc.adjust(DateTime(current_time));  
+    rtc.adjust(DateTime(current_time)); 
+
+    log_event(RTC_UPDATE);
 }

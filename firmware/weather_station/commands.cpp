@@ -23,36 +23,34 @@ void check_commands(void) {
           
            case SD_DUMP:
               
-              Serial.println("Dumping SD...");
+              log_event(SD_DUMP);
               dump_sd();
               break;
           
            case TX_ENABLE:
            
-              Serial.println("Enabling TX...");
+              log_event(TX_ENABLE);  
               tx_flag = true;
               break;
   
            case TX_DISABLE:
            
-              Serial.println("Disabling TX...");
+              log_event(TX_DISABLE);  
               tx_flag = false;
               break;
   
            case RTC_UPDATE:
-           
-              Serial.println("Updating RTC...");            
+         
               rtc_update();            
               break;
   
            case IDLE_UPDATE:
            
-              Serial.println("Updating IDLE Time...");           
               idle_update();
               break;
   
            default:
-              Serial.println("Command Not Recognised");            
+              log_event(UNKNOWN_COMMAND);         
         }    
     }
 }
@@ -73,7 +71,7 @@ bool extract_payload(uint32_t* data, uint8_t num_bytes) {
     if(i==(num_bytes)) {
         return true;  
     } else {
-        Serial.println("Command Payload Read Error");
+        log_event(PAYLOAD_ERROR);
         return false;  
     }
 }
@@ -90,10 +88,6 @@ void rtc_update(void) {
         /* Set RTC Time */
         rtc_time = (uint32_t)(time_data[0] | time_data[1]<<8 | time_data[2]<<16 | time_data[3]<<24);
         set_time(rtc_time);
-        
-        /* Debug */   
-        Serial.print("RTC Set to ");
-        Serial.println(get_timestamp());
     }
 }
 
@@ -107,7 +101,6 @@ void idle_update(void) {
       
         /* Set Idle Time */
         idle_time = (uint32_t)(idle_data[0] | idle_data[1]<<8 | idle_data[2]<<16 | idle_data[3]<<24);
-        Serial.print("Idle period set to ");
-        Serial.println(idle_time);
+        log_event(IDLE_UPDATE);
     }
 }

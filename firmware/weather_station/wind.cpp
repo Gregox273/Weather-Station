@@ -24,9 +24,4 @@ void log_wind_reading(void) {
     data[0] = (uint8_t)(frq & 0xFF);
     data[1] = (uint8_t)((frq >> 8) & 0xFF);    
     log_data(ID_WIND, data, 2);
-    
-    /* Debug */
-    Serial.print("Wind Freq: ");
-    Serial.println(frq);
-
 }
