@@ -1,5 +1,7 @@
 """GUI Process
 Gregory Brooks(gb510), Matt Coates(mc955) 2018
+Includes gist (https://gist.github.com/friendzis/4e98ebe2cf29c0c2c232)
+by friendzis & scls19fr
 """
 from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL,QTimer
@@ -13,6 +15,7 @@ import time
 from timeit import default_timer as timer
 from math import floor
 import pyqtgraph as pg
+import datetime
 
 script_dir = os.path.dirname(__file__)
 
@@ -21,6 +24,16 @@ try:
 except AttributeError:
     def _fromUtf8(s):
         return s
+
+def int2dt(ts, ts_mult=1e6):
+    return(datetime.datetime.utcfromtimestamp(float(ts)/ts_mult))
+
+class TimeAxisItem(pg.AxisItem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def tickStrings(self, values, scale, spacing):
+        return [int2dt(value).strftime("%H:%M:%S\n%-j/%-m/%Y") for value in values]
 
 class MainThd(QThread):
     def __init__(self, window_pipe, usb_pipe, log_pipe):
@@ -49,15 +62,43 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     """Inherit main window generated in QT4 Designer"""
     def __init__(self, usb_pipe, log_pipe, parent=None):
 
+        # Graphs - enable antialiasing
+        pg.setConfigOptions(antialias=True,  # Enable antialiasing
+                            background=0.8,  # Background fill
+                            foreground='k')  # Black foreground (axes etc.)
+
         super().__init__(parent)
         self.setupUi(self)
-        # Enable antialiasing for prettier plots
-        pg.setConfigOptions(antialias=True)
 
         # Add slots and signals manually
 
         # Configure plots
-        self.graphicsViewTemp_L.plot([100,101,102],[200,210,220],title="Temperature")  
+        self.plot_temp_L = self.graphicsLayoutWidgetTemp_L.addPlot(title='Temperature',
+            axisItems={ 'bottom': TimeAxisItem(orientation="bottom")})
+        self.plot_temp_H = self.graphicsLayoutWidgetTemp_H.addPlot(title='Temperature',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_wind_L = self.graphicsLayoutWidgetWind_L.addPlot(title='Wind Speed',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_wind_H = self.graphicsLayoutWidgetWind_H.addPlot(title='Wind Speed',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_uv_L = self.graphicsLayoutWidgetUV_L.addPlot(title='UV Intensity',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_uv_H = self.graphicsLayoutWidgetUV_H.addPlot(title='UV Intensity',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_light_L = self.graphicsLayoutWidgetLight_L.addPlot(title='Light Intensity',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_light_H = self.graphicsLayoutWidgetLight_H.addPlot(title='Light Intensity',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+
+
+        all_graphs =    [self.plot_temp_L, self.plot_temp_H,
+                        self.plot_wind_L, self.plot_wind_H,
+                        self.plot_uv_L, self.plot_uv_H,
+                        self.plot_light_L, self.plot_light_H]
+        for nr, obj in enumerate(all_graphs):
+            # Apply operation to every graph
+            pass
+            #obj.repaint()
 
         # Start update thread
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>606</width>
+    <width>738</width>
     <height>469</height>
    </rect>
   </property>
@@ -14,8 +14,8 @@
    <string>Weather Station -gb510, mc955</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="main_tab_widget">
       <property name="minimumSize">
        <size>
@@ -30,38 +30,15 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="tabLive_view">
+      <widget class="QWidget" name="tabOverview">
        <attribute name="title">
-        <string>Live View</string>
+        <string>Overview</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="1" column="0">
-         <widget class="PlotWidget" name="graphicsViewUV_L">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="PlotWidget" name="graphicsViewWind_L">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="PlotWidget" name="graphicsViewLight_L">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetUV_L">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -71,47 +48,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="PlotWidget" name="graphicsViewTemp_L">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabHistoric_view">
-       <attribute name="title">
-        <string>Historic View</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="PlotWidget" name="graphicsViewTemp_H">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="PlotWidget" name="graphicsViewWind_H">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="PlotWidget" name="graphicsViewUV_H">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetTemp_L">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -121,12 +58,25 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="PlotWidget" name="graphicsViewLight_H">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetLight_L">
           <property name="minimumSize">
            <size>
             <width>0</width>
             <height>0</height>
            </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetWind_L">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
           </property>
          </widget>
         </item>
@@ -152,6 +102,118 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabSerial">
+       <attribute name="title">
+        <string>Serial</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QTextBrowser" name="textBrowserSerial">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="openLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="1" alignment="Qt::AlignTop">
+     <widget class="QWidget" name="widgetButtons" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>140</width>
+        <height>200</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>200</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="pushButtonDumpSD">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>26</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Dump SD</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioButtonLiveData">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>26</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Show Live Data</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonUpdateRTC">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>26</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Update RTC</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonSetIdle">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>26</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Set Idle Time</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="spinBoxIdleTime">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="suffix">
+          <string>ms</string>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>1000</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -161,7 +223,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>606</width>
+     <width>738</width>
      <height>25</height>
     </rect>
    </property>
@@ -210,7 +272,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlotWidget</class>
+   <class>GraphicsLayoutWidget</class>
    <extends>QGraphicsView</extends>
    <header>pyqtgraph</header>
   </customwidget>

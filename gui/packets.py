@@ -7,44 +7,54 @@ import json
 import datetime
 from enum import Enum
 
-# Log packet identifier definitions
+# Log packet/event identifier definitions
 class Identifier(Enum):
-    Temperature = 0x01
-    UV = 0x02
-    Light = 0x04
-    Windspeed = 0x08
-    Air_quality = 0x18
-    GPS = 0x81
+    # Log Packets
+    Temperature = 0x01  # Raw ADC
+    UV = 0x02           # Raw ADC
+    Light = 0x04        # Raw ADC
+    Low_Light = 0x08    # Raw ADC
+    V_Low_Light = 0x10  # Raw ADC
+    Windspeed = 0x20    # Frequency
+    Supply_V = 0x40     # mV
+
+    #Events
+    RTC_Error = 0x80        # Communication with DS1307 failed
+    RTC_Update = 0x81       # RTC Time updated
+    Idle_Update = 0x82      # Idle time between measurement cycles updated
+    Payload_Error = 0x83    # Payload of a command couldn't be determined
+    Unknown_Command = 0x84  # Unknown command received
+    Tx_Enable = 0x85        # Live transmission of data enabled
+    Tx_Disable = 0x86       # Live transmission of data disabled
+    SD_Dump = 0x87          # SD card dumped to host computer
 
 # Command packet identifiers
 class Command(Enum):
     Request_dump = 0x11
     Start_tx = 0x81
     Stop_tx  = 0x18
-    RTC_update   = 0x88
+    RTC_update   = 0x88      # Current unix time in s
+    Idle_time_update = 0x44  # Desired idle time in us
+
 
 # Important Constants:
-STD_PCKT_LEN = 7   # Number of bytes in a standard ADC reading packet
-GPS_PCKT_LEN = 20  # Number of bytes in GPS packet
-PCKT_LEN = {Identifier.Temperature: STD_PCKT_LEN,
-            Identifier.UV: STD_PCKT_LEN,
-            Identifier.Light: STD_PCKT_LEN,
-            Identifier.Windspeed: STD_PCKT_LEN,
-            Identifier.Air_quality: STD_PCKT_LEN,
-            Identifier.GPS: GPS_PCKT_LEN}  # List of packet lengths
+LOG_PCKT_LEN = 7   # Number of bytes in a standard ADC reading packet
+PCKT_LEN = {Identifier.Temperature: LOG_PCKT_LEN,
+            Identifier.UV: LOG_PCKT_LEN,
+            Identifier.Light: LOG_PCKT_LEN,
+            Identifier.Windspeed: LOG_PCKT_LEN,
+           }  # List of packet lengths
 
 ID_POSITION = 4  # Byte position of log packet ID (zero indexed)
 
-WAKEUP_BYTE = 0xAA
+WAKEUP_BYTE = 0xAA  # Command packet prefix
 
 
-
-
-class Std_Packet(object):
-    """Standard log packet, containing timestamp, id and sensor reading"""
-    def __init__(self, input_struct=bytes(STD_PCKT_LEN)):
+class Log_Packet(object):
+    """Log packet, containing timestamp, id and sensor reading"""
+    def __init__(self, input_struct=bytes(LOG_PCKT_LEN)):
         self.data_struct = input_struct
-        meta_data = struct.unpack('<IBH', self.data_struct[0:STD_PCKT_LEN])
+        meta_data = struct.unpack('<IBH', self.data_struct[0:LOG_PCKT_LEN])
         self.timestamp = meta_data[0] # Seconds (UNIX), 4 byte uint
         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
             strftime('%H:%M:%S %d-%m-%Y')
@@ -55,38 +65,26 @@ class Std_Packet(object):
         # Method to print packet to terminal within the GUI
          textbox.moveCursor(QtGui.QTextCursor.End)
          textbox.ensureCursorVisible()
+         textbox.insertPlainText("Log Packet: ({})\n".format(self.id.name))
          textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
-         textbox.insertPlainText("Identifier: {}\n".format(self.id.name))
          textbox.insertPlainText("Payload: {}\n".format(self.payload))
 
-class GPS_Packet(object):
-    """Log of GPS output (from NMEA strings)"""
-    def __init__(self, input_struct=bytes(GPS_PCKT_LEN)):
+class Event(object):
+    """Event packet"""
+    def __init__(self,input_struct=bytes(EVENT_PCKT_LEN)):
         self.data_struct = input_struct
-        meta_data = struct.unpack('<IBiiHIB', self.data_struct[0:GPS_PCKT_LEN])
+        meta_data = struct.unpack('<IB', self.data_struct[0:EVENT_PCKT_LEN])
         self.timestamp = meta_data[0] # Seconds (UNIX), 4 byte uint
         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
             strftime('%H:%M:%S %d-%m-%Y')
-        self.id = meta_data[1]
-        self.latitude = meta_data[2]/10000000   # Degrees
-        self.longitude = meta_data[3]/10000000  # Degrees
-        self.height = meta_data[4]/1000         # metres
-        self.gps_time = meta_data[5]
-        self.gps_time_date = datetime.datetime.fromtimestamp(self.gps_time).\
-            strftime('%H:%M:%S %d-%m-%Y')
-        self.num_sat = meta_data[6]
+        self.id = meta_data[1]  # Identifier, single byte (uint8)
 
     def printout(self,textbox):
         # Method to print packet to terminal within the GUI
          textbox.moveCursor(QtGui.QTextCursor.End)
          textbox.ensureCursorVisible()
-         textbox.insertPlainText("Timestamp: {} ({})\n".format(self.time_date,self.timestamp))
-         textbox.insertPlainText("Identifier: {}\n".format(self.id.name))
-         textbox.insertPlainText("Latitude: {}°N\n".format(self.latitude))
-         textbox.insertPlainText("Longitude: {}°E\n".format(self.longitude))
-         textbox.insertPlainText("Height: {}m\n".format(self.height))
-         textbox.insertPlainText("GPS Time: {} ({}s)\n".format(self.gps_time_date,self.gps_time))
-         textbox.insertPlainText("# of Satellites: {}\n".format(self.num_sat))
+         textbox.insertPlainText("Event: ({})\n".format(self.id.name))
+         textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
 
 class Cmd_Packet(object):
     """Base PC to datalogger command packet"""
@@ -108,7 +106,7 @@ class RTC_packet(Cmd_Packet):
         return self.packed_bytes
 
 ### Internal to ground station ###
-class Usb_conn:
+class Usb_conn(object):
     """Command (from GUI to USB process) to enable/disable serial connection"""
     def __init__(self,conn):
         self.conn = conn
