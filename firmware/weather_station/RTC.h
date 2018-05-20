@@ -1,7 +1,10 @@
 #ifndef RTC_H
 #define RTC_H
 
-/* I2C Pin Mapping */
+#include "Arduino.h"
 
+void rtc_setup(void);
+void set_time(uint32_t current_time);
+uint32_t get_timestamp(void);
 
 #endif

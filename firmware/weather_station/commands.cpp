@@ -1,3 +1,4 @@
+#include "RTC.h"
 #include "Arduino.h"
 #include "commands.h"
 #include "logging.h"
@@ -12,53 +13,47 @@ void check_commands(void) {
 
     uint8_t wkup;
     uint8_t cmd;
-  
-    //Serial.println("Checking Serial...");
 
     if(Serial.available()>0) {
       
-      wkup = Serial.read();
-      cmd = Serial.read();
-
-      switch(cmd) {
-        
-         case SD_DUMP:
-            
-            Serial.println("Dumping SD...");
-            dump_sd();
-            break;
-        
-         case TX_ENABLE:
-         
-            Serial.println("Enabling TX...");
-            tx_flag = true;
-            break;
-
-         case TX_DISABLE:
-         
-            Serial.println("Disabling TX...");
-            tx_flag = false;
-            break;
-
-         case RTC_UPDATE:
-         
-            Serial.println("Updating RTC...");            
-            rtc_update();            
-            break;
-
-         case IDLE_UPDATE:
-         
-            Serial.println("Updating IDLE Time...");           
-            idle_update();
-            break;
-
-         default:
-            Serial.println("Command Not Recognised");            
-      }
-            
-    } else {
-      
-      //Serial.println("No Commands Found");
+        wkup = Serial.read();
+        cmd = Serial.read();
+  
+        switch(cmd) {
+          
+           case SD_DUMP:
+              
+              Serial.println("Dumping SD...");
+              dump_sd();
+              break;
+          
+           case TX_ENABLE:
+           
+              Serial.println("Enabling TX...");
+              tx_flag = true;
+              break;
+  
+           case TX_DISABLE:
+           
+              Serial.println("Disabling TX...");
+              tx_flag = false;
+              break;
+  
+           case RTC_UPDATE:
+           
+              Serial.println("Updating RTC...");            
+              rtc_update();            
+              break;
+  
+           case IDLE_UPDATE:
+           
+              Serial.println("Updating IDLE Time...");           
+              idle_update();
+              break;
+  
+           default:
+              Serial.println("Command Not Recognised");            
+        }    
     }
 }
 
@@ -94,12 +89,12 @@ void rtc_update(void) {
       
         /* Set RTC Time */
         rtc_time = (uint32_t)(time_data[0] | time_data[1]<<8 | time_data[2]<<16 | time_data[3]<<24);
-        Serial.print("RTC Time ");
-        Serial.println(rtc_time);
-
-        /* TODO: Update RTC Here */
+        set_time(rtc_time);
+        
+        /* Debug */   
+        Serial.print("RTC Set to ");
+        Serial.println(get_timestamp());
     }
-
 }
 
 
