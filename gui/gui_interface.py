@@ -47,11 +47,11 @@ class MainThd(QThread):
 
     def run(self):
         while True:
-            if self.usb_pipe.poll(0.01):
+            if self.usb_pipe.poll(0.05):
                 new_packet_usb = self.usb_pipe.recv()
                 self.emit(SIGNAL('new_packet(PyQt_PyObject)'),new_packet_usb)
 
-            if self.window_pipe.poll(0.01):
+            if self.window_pipe.poll(0.05):
                 new_packet_window = self.window_pipe.recv()
 
                 if isinstance(new_packet_window,Usb_command)\

@@ -67,13 +67,13 @@ def run(gui_pipe, log_pipe, gui_exit):
                     if id in LOG_PCKT_LIST:
                         length = LOG_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
-                            message = Log_Packet(serial_buffer[0:length-1])
+                            message = Log_Packet(serial_buffer[0:length])
                             gui_pipe.send(message)
                             log_pipe.send(message)
                     elif id in EVENT_PCKT_LIST:
                         length = EVENT_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
-                            message = Event_Packet(serial_buffer[0:length-1])
+                            message = Event_Packet(serial_buffer[0:length])
                             gui_pipe.send(message)
                             log_pipe.send(message)
                     else:
