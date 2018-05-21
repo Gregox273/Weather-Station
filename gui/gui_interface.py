@@ -92,11 +92,11 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
     def update_rtc(self):
         cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("RTC_update")]
-        cmd = RTC_Packet(cmd_id, time.time())  # Update with current time
+        cmd = RTC_Packet(cmd_id, int(round(time.time())))  # Update with current time
         self.gui_end.send(cmd)
 
     def set_idle(self,idle_time):
-        cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("RTC_update")]
+        cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Idle_time_update")]
         cmd = Idle_Time_Packet(cmd_id, idle_time)
         self.gui_end.send(cmd)
 

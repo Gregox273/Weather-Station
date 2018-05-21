@@ -91,7 +91,7 @@ class Cmd_Packet(object):
         self.cmd = cmd
 
     def to_binary(self):
-        self.packed_bytes = struct.pack('>BB', WAKEUP_BYTE, self.cmd)
+        self.packed_bytes = struct.pack('<BB', WAKEUP_BYTE, self.cmd)
         return self.packed_bytes
 
 class RTC_Packet(Cmd_Packet):
@@ -101,7 +101,7 @@ class RTC_Packet(Cmd_Packet):
         self.time = time
 
     def to_binary(self):
-        self.packed_bytes = struct.pack('>BBI', WAKEUP_BYTE, self.cmd, self.time)
+        self.packed_bytes = struct.pack('<BBI', WAKEUP_BYTE, self.cmd, self.time)
         return self.packed_bytes
 
 class Idle_Time_Packet(Cmd_Packet):
@@ -111,7 +111,7 @@ class Idle_Time_Packet(Cmd_Packet):
         self.idle_time = idle_time
 
     def to_binary(self):
-        self.packed_bytes = struct.pack('>BBI', WAKEUP_BYTE, self.cmd, self.idle_time)
+        self.packed_bytes = struct.pack('<BBI', WAKEUP_BYTE, self.cmd, self.idle_time)
         return self.packed_bytes
 
 ### Internal to ground station ###

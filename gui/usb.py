@@ -51,32 +51,34 @@ def run(gui_pipe, log_pipe, gui_exit):
 
         if ser.is_open:
             byte_in = ser.read()
-            if len(byte_in == 0):
+            if not byte_in:
                 # Timeout, clear buffer and continue while loop
-                serial_buffer = bytesarray()
+                serial_buffer = bytearray()
                 continue
             if args.debug:
                 # In debug mode, print incoming bytes to terminal
-                print(byte_in.decode('utf-8'), end='')
-            serial_buffer.append(byte_in)
-            if len(serial_buffer) > ID_POSITION:
-                # Check ID
-                id = serial_buffer[ID_POSITION]
-                if id in list(LOG_PCKT_LIST.values()[0]):
-                    length = LOG_PCKT_LIST.get(id)[1]
-                    if len(serial_buffer) >= length:
-                        message = Log_Packet(serial_buffer[0:length-1])
-                        gui_pipe.send(message)
-                        log_pipe.send(message)
-                elif id in list(EVENT_PCKT_LIST.values()[0]):
-                    length = EVENT_PCKT_LIST.get(id)[1]
-                    if len(serial_buffer) >= length:
-                        message = Event_Packet(serial_buffer[0:length-1])
-                        gui_pipe.send(message)
-                        log_pipe.send(message)
-                else:
-                    # Unrecognised packet, empty buffer
-                    serial_buffer = bytesarray()
+                #print(byte_in.decode('utf-8'), end='')
+                print(byte_in)
+            else:
+                serial_buffer.extend(byte_in)
+                if len(serial_buffer) > ID_POSITION:
+                    # Check ID
+                    id = serial_buffer[ID_POSITION]
+                    if id in LOG_PCKT_LIST:
+                        length = LOG_PCKT_LIST.get(id)[1]
+                        if len(serial_buffer) >= length:
+                            message = Log_Packet(serial_buffer[0:length-1])
+                            gui_pipe.send(message)
+                            log_pipe.send(message)
+                    elif id in EVENT_PCKT_LIST:
+                        length = EVENT_PCKT_LIST.get(id)[1]
+                        if len(serial_buffer) >= length:
+                            message = Event_Packet(serial_buffer[0:length-1])
+                            gui_pipe.send(message)
+                            log_pipe.send(message)
+                    else:
+                        # Unrecognised packet, empty buffer
+                        serial_buffer = bytearray()
 
 
         else:

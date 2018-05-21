@@ -18,33 +18,32 @@ void check_commands(void) {
       
         wkup = Serial.read();
         cmd = Serial.read();
-  
+        
         switch(cmd) {
           
-           case SD_DUMP:
-              
+           case CMD_SD_DUMP:
               log_event(SD_DUMP);
               dump_sd();
               break;
           
-           case TX_ENABLE:
+           case CMD_TX_ENABLE:
            
               log_event(TX_ENABLE);  
               tx_flag = true;
               break;
   
-           case TX_DISABLE:
+           case CMD_TX_DISABLE:
            
               log_event(TX_DISABLE);  
               tx_flag = false;
               break;
   
-           case RTC_UPDATE:
+           case CMD_RTC_UPDATE:
          
               rtc_update();            
               break;
   
-           case IDLE_UPDATE:
+           case CMD_IDLE_UPDATE:
            
               idle_update();
               break;
@@ -98,7 +97,7 @@ void idle_update(void) {
     /* Read Update Period */
     uint32_t idle_data[4];
     if(extract_payload(idle_data, 4)) {
-      
+              
         /* Set Idle Time */
         idle_time = (uint32_t)(idle_data[0] | idle_data[1]<<8 | idle_data[2]<<16 | idle_data[3]<<24);
         log_event(IDLE_UPDATE);
