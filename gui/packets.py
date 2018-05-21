@@ -7,47 +7,39 @@ import json
 import datetime
 from enum import Enum
 
-# Log packet/event identifier definitions
-class Identifier(Enum):
-    # Log Packets
-    Temperature = 0x01  # Raw ADC
-    UV = 0x02           # Raw ADC
-    Light = 0x04        # Raw ADC
-    Low_Light = 0x08    # Raw ADC
-    V_Low_Light = 0x10  # Raw ADC
-    Windspeed = 0x20    # Frequency
-    Supply_V = 0x40     # mV
-
-    #Events
-    RTC_Error = 0x80        # Communication with DS1307 failed
-    RTC_Update = 0x81       # RTC Time updated
-    Idle_Update = 0x82      # Idle time between measurement cycles updated
-    Payload_Error = 0x83    # Payload of a command couldn't be determined
-    Unknown_Command = 0x84  # Unknown command received
-    Tx_Enable = 0x85        # Live transmission of data enabled
-    Tx_Disable = 0x86       # Live transmission of data disabled
-    SD_Dump = 0x87          # SD card dumped to host computer
-
-# Command packet identifiers
-class Command(Enum):
-    Request_dump = 0x11
-    Start_tx = 0x81
-    Stop_tx  = 0x18
-    RTC_update   = 0x88      # Current unix time in s
-    Idle_time_update = 0x44  # Desired idle time in us
-
-
 # Important Constants:
-LOG_PCKT_LEN = 7   # Number of bytes in a standard ADC reading packet
-PCKT_LEN = {Identifier.Temperature: LOG_PCKT_LEN,
-            Identifier.UV: LOG_PCKT_LEN,
-            Identifier.Light: LOG_PCKT_LEN,
-            Identifier.Windspeed: LOG_PCKT_LEN,
-           }  # List of packet lengths
+LOG_PCKT_LEN = 7    # Number of bytes in a standard ADC reading packet
+EVENT_PCKT_LEN = 5  # Number of bytes in a log packet
 
 ID_POSITION = 4  # Byte position of log packet ID (zero indexed)
 
 WAKEUP_BYTE = 0xAA  # Command packet prefix
+
+LOG_PCKT_LIST = {"Temperature":[0x01, LOG_PCKT_LEN], # Raw ADC
+                "UV": [0x02, LOG_PCKT_LEN],           # Raw ADC
+                "Light": [0x04, LOG_PCKT_LEN],        # Raw ADC
+                "Low_Light": [0x08, LOG_PCKT_LEN],   # Raw ADC
+                "V_Low_Light": [0x10, LOG_PCKT_LEN],  # Raw ADC
+                "Windspeed": [0x20, LOG_PCKT_LEN],    # Frequency
+                "Supply_V": [0x40, LOG_PCKT_LEN]      # mV
+}  # List of log packets {"Name": [id, length in bytes]}
+
+EVENT_PCKT_LIST = { "RTC_Error": [0x80, EVENT_PCKT_LEN],       # Communication with DS1307 failed
+                    "RTC_Update": [0x81, EVENT_PCKT_LEN],      # RTC Time updated
+                    "Idle_Update": [0x82, EVENT_PCKT_LEN],      # Idle time between measurement cycles updated
+                    "Payload_Error": [0x83, EVENT_PCKT_LEN],    # Payload of a command couldn't be determined
+                    "Unknown_Command": [0x84, EVENT_PCKT_LEN],  # Unknown command received
+                    "Tx_Enable": [0x85, EVENT_PCKT_LEN],        # Live transmission of data enabled
+                    "Tx_Disable": [0x86, EVENT_PCKT_LEN],       # Live transmission of data disabled
+                    "SD_Dump": [0x87, EVENT_PCKT_LEN]          # SD card dumped to host computer
+}  # List of event packets {"Name": [id, length in bytes]}
+
+CMD_PACKET_LIST = { "Request_dump": [0x11, 2],     # Request sd card data dump
+                    "Start_tx": [0x81, 2],         # Start sending live sensor data
+                    "Stop_tx": [0x18, 2],          # Stop sending lve sensor data
+                    "RTC_update": [0x88, 6],       # Current unix time in s
+                    "Idle_time_update": [0x44, 6]  # Desired idle time in us
+}  # List of command packets {"Name": [id, length in bytes]}
 
 
 class Log_Packet(object):
@@ -65,7 +57,9 @@ class Log_Packet(object):
         # Method to print packet to terminal within the GUI
          textbox.moveCursor(QtGui.QTextCursor.End)
          textbox.ensureCursorVisible()
-         textbox.insertPlainText("Log Packet: ({})\n".format(self.id.name))
+         ldict = LOG_PCKT_LIST
+         name = list(ldict.keys())[list(ldict.values()(0)).index(self.id)]
+         textbox.insertPlainText("Log Packet: ({})\n".format(name))
          textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
          textbox.insertPlainText("Payload: {}\n".format(self.payload))
 
@@ -83,6 +77,9 @@ class Event(object):
         # Method to print packet to terminal within the GUI
          textbox.moveCursor(QtGui.QTextCursor.End)
          textbox.ensureCursorVisible()
+         edict = EVENT_PCKT_LIST
+         name = list(edict.keys())[list(edict.values()(0)).index(self.id)]
+         textbox.insertPlainText("Log Packet: ({})\n".format(name))
          textbox.insertPlainText("Event: ({})\n".format(self.id.name))
          textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
 

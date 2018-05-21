@@ -18,7 +18,7 @@ def run(gui_pipe, log_pipe, gui_exit):
         default='/dev/ttyACM0', help='Serial port to use')
 
     args = parser.parse_args()
-    ser = serial.Serial(args.port)  # Open serial port
+    ser = serial.Serial(port = args.port, baudrate = 115200, write_timeout = 10)  # Open serial port
 
     while not gui_exit.is_set():
         # Main loop
@@ -33,6 +33,10 @@ def run(gui_pipe, log_pipe, gui_exit):
                 elif not cmd.conn and ser.is_open:
                     # Disconnect
                     ser.close()
+            elif isinstance(cmd,Cmd_Packet):
+                # Send to the arduino
+                if ser.is_open:
+                    ser.write(cmd.to_binary())
 
         if ser.is_open:
             # Read in a packet if there are more bytes than the min packet length available
@@ -42,10 +46,10 @@ def run(gui_pipe, log_pipe, gui_exit):
                 id = data[ID_POSITION]
                 data += ser.read(PCKT_LEN[id] - ID_POSITION - 1)  # Size of packet determined from id
 
-                # Handle message
-                if id == Identifier.GPS:
-                    message = GPS_Packet(data)
-                else:
-                    message = Packet(data)
+                # Handle messages
+                if id in list(LOG_PCKT_LIST.values()(0)):
+                    message = Log_Packet(data)
+                elif id in list(EVENT_PCKT_LIST.values()(0)):
+                    message = Event(data)
                 gui_pipe.send(message)
                 log_pipe.send(message)
