@@ -30,7 +30,17 @@ SD_DUMP = int("0x87", 0)
 
 # Nominal Supply Voltage
 v_supply = 5.0
-        
+
+# Amplifier Gains
+temp_gain = 5.0164 
+uv_gain = 1.0
+v_low_light_gain = 1.0
+
+# Resistor Values
+light_res = 997.613
+low_light_res = 46354.1
+
+       
 # Open log file
 with open(sys.argv[1], 'rb') as log:
 
@@ -51,16 +61,16 @@ with open(sys.argv[1], 'rb') as log:
         header = log.read(5)    
         
         # Get Message Metadata
-        meta_data = struct.unpack('<IB', header)
-        time_stamp = datetime.datetime.fromtimestamp(meta_data[0]).strftime('%Y-%m-%d %H:%M:%S')
-        log_type = meta_data[1]
-        
+        meta_data = struct.unpack('<BI', header)
+        log_type = meta_data[0]
+        time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
+                
         # Data - Temp
         if(log_type == ID_TEMP):
         
             payload = log.read(2)
             res = struct.unpack('<H', payload)
-            temp = ((res[0]*v_supply)/(1024*5.0164))*100 - 50
+            temp = ((res[0]*v_supply)/(1024*temp_gain))*100 - 50
             print(time_stamp, "Temp = %.2f" %temp, "C")
             i += 7 
             
@@ -69,7 +79,11 @@ with open(sys.argv[1], 'rb') as log:
         
             payload = log.read(2)
             res = struct.unpack('<H', payload)
-            print(time_stamp, "UV =", res[0])
+            vout = ((res[0]*v_supply)/(1024*uv_gain))
+            uv = vout/(4.3*0.026)
+            power = vout/(4.3*0.113)
+            print(time_stamp, "UV-A Power = %.3f" %power, "mW/cm^2")
+            print(time_stamp, "UV Index = %.2f" %uv)
             i += 7 
             
         # Data - Light
@@ -77,7 +91,9 @@ with open(sys.argv[1], 'rb') as log:
         
             payload = log.read(2)
             res = struct.unpack('<H', payload)
-            print(time_stamp, "Light =", res[0])
+            vout = (res[0]/1024)*v_supply
+            i_ph = vout/light_res
+            print(time_stamp, "Light = %.3e" %i_ph, "A")
             i += 7 
             
         # Data - Low Light
@@ -85,7 +101,9 @@ with open(sys.argv[1], 'rb') as log:
         
             payload = log.read(2)
             res = struct.unpack('<H', payload)
-            print(time_stamp, "Low Light =", res[0])
+            vout = (res[0]/1024)*v_supply
+            i_ph = vout/low_light_res
+            print(time_stamp, "Low Light = %.3e" %i_ph, "A")
             i += 7 
             
         # Data - Very Low Light
@@ -101,7 +119,8 @@ with open(sys.argv[1], 'rb') as log:
         
             payload = log.read(2)
             res = struct.unpack('<H', payload)
-            print(time_stamp, "Wind =", res[0])
+            freq = res[0]/3.0
+            print(time_stamp, "Wind = %.2f" %freq, "Hz")
             i += 7    
             
         # Data - Supply Voltage
