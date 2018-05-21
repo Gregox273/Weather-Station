@@ -35,8 +35,8 @@ void log_data(uint8_t id, uint8_t* buff, uint8_t len){
     /* Write Data to Log File */
     logFile = SD.open("log.bin", FILE_WRITE);
     if (logFile) {
-      logFile.write(time_data, 4);
       logFile.write(id);
+      logFile.write(time_data, 4);
       logFile.write(buff, len);
       logFile.close();
     } else {
@@ -45,8 +45,8 @@ void log_data(uint8_t id, uint8_t* buff, uint8_t len){
 
     /* Vomit Over USB */
     if(tx_flag) {
-      Serial.write(time_data, 4);
       Serial.write(id);
+      Serial.write(time_data, 4);
       Serial.write(buff, len);
     }
 }
@@ -68,8 +68,8 @@ void log_event(uint8_t event){
     /* Write Data to Log File */
     logFile = SD.open("log.bin", FILE_WRITE);
     if (logFile) {
-      logFile.write(time_data, 4);
       logFile.write(event);
+      logFile.write(time_data, 4);
       logFile.close();
     } else {
       Serial.println("Error Writing to File");
@@ -77,8 +77,8 @@ void log_event(uint8_t event){
 
     /* Vomit Over USB */
     if(tx_flag) {
-      Serial.write(time_data, 4);
       Serial.write(event);
+      Serial.write(time_data, 4);
     }
 }
 
