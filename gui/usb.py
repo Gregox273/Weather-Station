@@ -17,12 +17,23 @@ def run(gui_pipe, log_pipe, gui_exit):
     parser.add_argument('--port', dest='port', type=str, nargs='?', \
         default='/dev/ttyACM0', help='Serial port to use')
 
+    parser.add_argument('--baud', dest='baud', type=int, nargs='?', \
+        default=115200, help='Baud rate')
+
+    parser.add_argument("-d", "--debug", help="print incoming serial",
+                    action="store_true")
+
     args = parser.parse_args()
-    ser = serial.Serial(port = args.port, baudrate = 115200, write_timeout = 10)  # Open serial port
+    ser = serial.Serial(port = args.port, baudrate = args.baud, write_timeout = 3, timeout = 800/args.baud)  # Open serial port
+    # timeout is time taken to send 100 bytes at baudrate
+    time.sleep(3)  # Give arduino time to reset
+    if args.debug:
+        print("Debug mode activated, incoming serial:")
+
+    serial_buffer = bytearray()
 
     while not gui_exit.is_set():
         # Main loop
-        time.sleep(0.2)
         if gui_pipe.poll():
             # Receive incoming commands from the gui process
             cmd = gui_pipe.recv()
@@ -39,17 +50,34 @@ def run(gui_pipe, log_pipe, gui_exit):
                     ser.write(cmd.to_binary())
 
         if ser.is_open:
-            # Read in a packet if there are more bytes than the min packet length available
-            if ser.in_waiting>=PCKT_LEN[min(PCKT_LEN,key=PCKT_LEN.get)]:
+            byte_in = ser.read()
+            if len(byte_in == 0):
+                # Timeout, clear buffer and continue while loop
+                serial_buffer = bytesarray()
+                continue
+            if args.debug:
+                # In debug mode, print incoming bytes to terminal
+                print(byte_in.decode('utf-8'), end='')
+            serial_buffer.append(byte_in)
+            if len(serial_buffer) > ID_POSITION:
                 # Check ID
-                data = ser.read(ID_POSITION+1)
-                id = data[ID_POSITION]
-                data += ser.read(PCKT_LEN[id] - ID_POSITION - 1)  # Size of packet determined from id
+                id = serial_buffer[ID_POSITION]
+                if id in list(LOG_PCKT_LIST.values()[0]):
+                    length = LOG_PCKT_LIST.get(id)[1]
+                    if len(serial_buffer) >= length:
+                        message = Log_Packet(serial_buffer[0:length-1])
+                        gui_pipe.send(message)
+                        log_pipe.send(message)
+                elif id in list(EVENT_PCKT_LIST.values()[0]):
+                    length = EVENT_PCKT_LIST.get(id)[1]
+                    if len(serial_buffer) >= length:
+                        message = Event_Packet(serial_buffer[0:length-1])
+                        gui_pipe.send(message)
+                        log_pipe.send(message)
+                else:
+                    # Unrecognised packet, empty buffer
+                    serial_buffer = bytesarray()
 
-                # Handle messages
-                if id in list(LOG_PCKT_LIST.values()(0)):
-                    message = Log_Packet(data)
-                elif id in list(EVENT_PCKT_LIST.values()(0)):
-                    message = Event(data)
-                gui_pipe.send(message)
-                log_pipe.send(message)
+
+        else:
+            time.sleep(0.2)

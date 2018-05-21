@@ -4,7 +4,7 @@ Includes gist (https://gist.github.com/friendzis/4e98ebe2cf29c0c2c232)
 by friendzis & scls19fr
 """
 from PyQt4 import QtCore, QtGui, QtWebKit
-from PyQt4.QtCore import QThread, SIGNAL,QTimer
+from PyQt4.QtCore import QThread, SIGNAL, QTimer
 from multiprocessing import Pipe, Process
 from .frontend import *
 from .frontend.main_window import Ui_WeatherStation
@@ -54,8 +54,9 @@ class MainThd(QThread):
             if self.window_pipe.poll(0.01):
                 new_packet_window = self.window_pipe.recv()
 
-                if isinstance(new_packet_window,Usb_command):
-                    self.usb_pipe.send(new_packet_window)
+                if isinstance(new_packet_window,Usb_command)\
+                    or isinstance(new_packet_window, Cmd_Packet):
+                        self.usb_pipe.send(new_packet_window)
 
 
 class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
@@ -70,42 +71,42 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         super().__init__(parent)
         self.setupUi(self)
 
-        # Add slots and signals manually
+        # Add slots and signals manually:
 
-        # Configure plots
-        self.plot_temp_L = self.graphicsLayoutWidgetTemp_L.addPlot(title='Temperature',
-            axisItems={ 'bottom': TimeAxisItem(orientation="bottom")})
-        self.plot_temp_H = self.graphicsLayoutWidgetTemp_H.addPlot(title='Temperature',
-            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
-        self.plot_wind_L = self.graphicsLayoutWidgetWind_L.addPlot(title='Wind Speed',
-            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
-        self.plot_wind_H = self.graphicsLayoutWidgetWind_H.addPlot(title='Wind Speed',
-            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
-        self.plot_uv_L = self.graphicsLayoutWidgetUV_L.addPlot(title='UV Intensity',
-            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
-        self.plot_uv_H = self.graphicsLayoutWidgetUV_H.addPlot(title='UV Intensity',
-            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
-        self.plot_light_L = self.graphicsLayoutWidgetLight_L.addPlot(title='Light Intensity',
-            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
-        self.plot_light_H = self.graphicsLayoutWidgetLight_H.addPlot(title='Light Intensity',
-            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
-
-
-        all_graphs =    [self.plot_temp_L, self.plot_temp_H,
-                        self.plot_wind_L, self.plot_wind_H,
-                        self.plot_uv_L, self.plot_uv_H,
-                        self.plot_light_L, self.plot_light_H]
-        for nr, obj in enumerate(all_graphs):
-            # Apply operation to every graph
-            pass
-            #obj.repaint()
-
-        # Start update thread
+        # Update thread, don't start yet
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
         self.update_thread = MainThd(thread_end, usb_pipe, log_pipe)
         self.connect(self.update_thread, SIGNAL("new_packet(PyQt_PyObject)"),self.new_packet)
+
+        self.pushButtonDumpSD.clicked.connect(self.dump_sd)
+        self.pushButtonUpdateRTC.clicked.connect(self.update_rtc)
+        self.pushButtonSetIdle.clicked.connect(lambda: self.set_idle(self.spinBoxIdleTime.value()))
+        self.radioButtonLiveData.clicked.connect(lambda: self.toggle_live_data(self.radioButtonLiveData.isChecked()))
+        # Start update thread
         self.update_thread.start(QThread.LowPriority)
 
+    def dump_sd(self):
+        cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Request_dump")]
+        cmd = Cmd_Packet(cmd_id)
+        self.gui_end.send(cmd)
+
+    def update_rtc(self):
+        cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("RTC_update")]
+        cmd = RTC_Packet(cmd_id, time.time())  # Update with current time
+        self.gui_end.send(cmd)
+
+    def set_idle(self,idle_time):
+        cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("RTC_update")]
+        cmd = Idle_Time_Packet(cmd_id, idle_time)
+        self.gui_end.send(cmd)
+
+    def toggle_live_data(self, on):
+        if on:
+            cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Start_tx")]
+        else:
+            cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Stop_tx")]
+        cmd = Cmd_Packet(cmd_id)
+        self.gui_end.send(cmd)
 
     def new_packet(self, packet):
         # Print to terminal tab

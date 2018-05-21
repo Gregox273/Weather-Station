@@ -40,6 +40,8 @@ def run():
     gui_process = multiprocessing.Process(target=gui_interface.run, args=(gui_usb_pipe, gui_log_pipe, gui_exit))
     gui_process.start()
 
+    print("Running...")
+
     # Start logging process
     log_process = multiprocessing.Process(target=logging.run, args=(log_usb_pipe, gui_exit, "../logs"))
     log_process.start()
@@ -48,7 +50,7 @@ def run():
     usb_process = multiprocessing.Process(target=usb.run, args=(usb_gui_pipe, usb_log_pipe, gui_exit))
     usb_process.start()
 
-    print("Running...")
+    
     gui_process.join()
     print("Exiting...")
     print("GUI process ended")

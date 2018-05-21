@@ -15,115 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
-     <widget class="QTabWidget" name="main_tab_widget">
-      <property name="minimumSize">
-       <size>
-        <width>300</width>
-        <height>300</height>
-       </size>
-      </property>
-      <property name="tabPosition">
-       <enum>QTabWidget::West</enum>
-      </property>
-      <property name="tabShape">
-       <enum>QTabWidget::Rounded</enum>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tabOverview">
-       <attribute name="title">
-        <string>Overview</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="1" column="0">
-         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetUV_L">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetTemp_L">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetLight_L">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetWind_L">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabTerminal">
-       <attribute name="title">
-        <string>Terminal</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QTextBrowser" name="textBrowserTerminal">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="openLinks">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabSerial">
-       <attribute name="title">
-        <string>Serial</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <widget class="QTextBrowser" name="textBrowserSerial">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="openLinks">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
     <item row="0" column="1" alignment="Qt::AlignTop">
      <widget class="QWidget" name="widgetButtons" native="true">
       <property name="minimumSize">
@@ -216,6 +107,95 @@
       </layout>
      </widget>
     </item>
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="main_tab_widget">
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>300</height>
+       </size>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::West</enum>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabOverview">
+       <attribute name="title">
+        <string>Overview</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="1" column="0">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetUV_O">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetTemp_O">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetLight_O">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetWind_O">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabTerminal">
+       <attribute name="title">
+        <string>Terminal</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QTextBrowser" name="textBrowserTerminal">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="openLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -233,9 +213,13 @@
     </property>
     <addaction name="actionConnect"/>
     <addaction name="separator"/>
-    <addaction name="actionLive_Sensor_Data"/>
-    <addaction name="actionDownload_from_SD"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuSerial"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
