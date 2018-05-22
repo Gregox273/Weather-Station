@@ -34,11 +34,11 @@ v_supply = 5.0
 # Amplifier Gains
 temp_gain = 5.0164 
 uv_gain = 5.0142
-v_low_light_gain = 1.0
+v_low_light_gain = 33.9525
 
 # Resistor Values
-light_res = 997.613
-low_light_res = 46354.1
+light_res = 995.823
+low_light_res = 32876.6
 
        
 # Open log file
@@ -93,7 +93,8 @@ with open(sys.argv[1], 'rb') as log:
             res = struct.unpack('<H', payload)
             vout = (res[0]/1024)*v_supply
             i_ph = vout/light_res
-            print(time_stamp, "Light = %.3e" %i_ph, "A")
+            i_ph_ma = i_ph*1000
+            print(time_stamp, "Light = %.3f" %i_ph_ma, "mA")
             i += 7 
             
         # Data - Low Light
@@ -103,7 +104,8 @@ with open(sys.argv[1], 'rb') as log:
             res = struct.unpack('<H', payload)
             vout = (res[0]/1024)*v_supply
             i_ph = vout/low_light_res
-            print(time_stamp, "Low Light = %.3e" %i_ph, "A")
+            i_ph_ua = i_ph*1000000
+            print(time_stamp, "Low Light = %.3f" %i_ph_ua, "uA")
             i += 7 
             
         # Data - Very Low Light
@@ -111,7 +113,10 @@ with open(sys.argv[1], 'rb') as log:
         
             payload = log.read(2)
             res = struct.unpack('<H', payload)
-            print(time_stamp, "Night Light =", res[0])
+            vout = ((res[0]*v_supply)/(1024*v_low_light_gain))
+            i_ph = vout/low_light_res
+            i_ph_ua = i_ph*1000000
+            print(time_stamp, "Night Light = %.3f" %i_ph_ua, "uA")
             i += 7 
             
         # Data - Wind
@@ -135,47 +140,63 @@ with open(sys.argv[1], 'rb') as log:
         # Event - RTC_ERROR
         if(log_type == RTC_ERROR):
         
+            print(" ")
             print(time_stamp, "EVENT - RTC ERROR")
+            print(" ")
             i += 5 
         
         # Event - RTC_UPDATE
         if(log_type == RTC_UPDATE):
         
+            print(" ")
             print(time_stamp, "EVENT - RTC_UPDATE")
+            print(" ")
             i += 5 
             
         # Event - IDLE_UPDATE
         if(log_type == IDLE_UPDATE):
         
+            print(" ")
             print(time_stamp, "EVENT - IDLE_UPDATE")
+            print(" ")
             i += 5 
             
         # Event - PAYLOAD_ERROR
         if(log_type == PAYLOAD_ERROR):
         
+            print(" ")
             print(time_stamp, "EVENT - PAYLOAD_ERROR")
+            print(" ")
             i += 5 
             
         # Event - UNKNOWN_COMMAND
         if(log_type == UNKNOWN_COMMAND):
         
+            print(" ")
             print(time_stamp, "EVENT - UNKNOWN_COMMAND")
+            print(" ")
             i += 5 
             
         # Event - TX_ENABLE
         if(log_type == TX_ENABLE):
         
+            print(" ")
             print(time_stamp, "EVENT - TX_ENABLE")
+            print(" ")
             i += 5 
             
         # Event - TX_DISABLE
         if(log_type == TX_DISABLE):
         
+            print(" ")
             print(time_stamp, "EVENT - TX_DISABLE")
+            print(" ")
             i += 5 
             
         # Event - SD_DUMP
         if(log_type == SD_DUMP):
         
+            print(" ")
             print(time_stamp, "EVENT - SD_DUMP")
+            print(" ")
             i += 5     
