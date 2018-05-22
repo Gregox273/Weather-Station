@@ -33,7 +33,7 @@ v_supply = 5.0
 
 # Amplifier Gains
 temp_gain = 5.0164 
-uv_gain = 1.0
+uv_gain = 5.0142
 v_low_light_gain = 1.0
 
 # Resistor Values
