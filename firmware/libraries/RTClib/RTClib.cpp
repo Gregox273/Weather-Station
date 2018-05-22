@@ -1,7 +1,17 @@
 // Code by JeeLabs http://news.jeelabs.org/code/
 // Released to the public domain! Enjoy!
+#define SDA_PORT PORTD
+#define SDA_PIN 6 // = D6
+#define SCL_PORT PORTD
+#define SCL_PIN 7 // = D7
+#include <SoftWire.h>
 
-#include <Wire.h>
+#define I2C_7BITADDR 0x68 // DS1307
+#define MEMLOC 0x0A
+#define ADDRLEN 1
+
+SoftWire Wire = SoftWire();
+
 #include "RTClib.h"
 #ifdef __AVR__
  #include <avr/pgmspace.h>

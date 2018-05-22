@@ -1,4 +1,3 @@
-#include <Wire.h>
 #include "RTC.h"
 #include "RTClib.h"
 #include "Arduino.h"
@@ -9,14 +8,11 @@ RTC_DS1307 rtc;
 /* Setup RTC */
 void rtc_setup(void) {
 
-  /* Init RTC */
-  if (! rtc.begin()) {
-    log_event(RTC_ERROR);
-    while (1);
-  }
-
-  /* Update RTC with Compile Time */
-  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    /* Init RTC */
+    if (! rtc.begin()) {
+      log_event(RTC_ERROR);
+      while (1);
+    }
 }
 
 
@@ -24,7 +20,7 @@ void rtc_setup(void) {
 uint32_t get_timestamp(void) {
   
     DateTime now = rtc.now();
-    
+    Serial.println(now.unixtime());
     return now.unixtime();
 }
 
