@@ -9,9 +9,18 @@ RTC_DS1307 rtc;
 void rtc_setup(void) {
 
     /* Init RTC */
-    if (! rtc.begin()) {
-      log_event(RTC_ERROR);
-      while (1);
+    if(!rtc.begin()) {
+        
+        /* RTC Communication Error */
+        log_event(RTC_ERROR);
+  
+        /* Error Out */
+        while(true) {
+            digitalWrite(LED_PIN, LOW);
+            delay(100);
+            digitalWrite(LED_PIN, HIGH);
+            delay(100); 
+        }
     }
 }
 
@@ -20,7 +29,6 @@ void rtc_setup(void) {
 uint32_t get_timestamp(void) {
   
     DateTime now = rtc.now();
-    Serial.println(now.unixtime());
     return now.unixtime();
 }
 

@@ -6,8 +6,8 @@
 
 /* State Machine Definitions */
 typedef enum {
-    STATE_IDLE=0, STATE_TEMP, STATE_UV, STATE_LOW_LIGHT,
-    STATE_LIGHT, STATE_WIND, NUM_STATES
+    STATE_IDLE=0, STATE_TEMP, STATE_UV, STATE_LIGHT,
+    STATE_LOW_LIGHT, STATE_V_LOW_LIGHT, STATE_WIND, NUM_STATES
 } state_t;
 
 typedef state_t state_func_t(void);
@@ -17,14 +17,15 @@ state_t run_state(state_t cur_state);
 static state_t do_state_idle(void);
 static state_t read_sensor_temp(void);
 static state_t read_sensor_uv(void);
-static state_t read_sensor_low_light(void);
 static state_t read_sensor_light(void);
+static state_t read_sensor_low_light(void);
+static state_t read_sensor_v_low_light(void);
 static state_t read_sensor_wind(void);
 
 /* State Table */
 state_func_t* const state_table[NUM_STATES] = {
-    do_state_idle, read_sensor_temp, read_sensor_uv, read_sensor_low_light,
-    read_sensor_light, read_sensor_wind
+    do_state_idle, read_sensor_temp, read_sensor_uv, read_sensor_light,
+    read_sensor_low_light, read_sensor_v_low_light, read_sensor_wind
 };
 
 /* State Table Lookup */
@@ -43,12 +44,15 @@ void setup() {
     /* Terminal Serial Port*/
     Serial.begin(115200);
 
+    /* Setup LED Pin */
+    pinMode(LED_PIN, OUTPUT);
+
     /* Setup SD Card */
     logging_setup(10);
 
     /* Enable Pullup on Hall Effect */
     pinMode(5, INPUT_PULLUP);
-
+   
     /* Setup RTC */
     rtc_setup();
 }
@@ -75,11 +79,17 @@ void loop() {
 /* IDLE State */
 static state_t do_state_idle(void){
 
+    /* Dim Activity LED */
+    digitalWrite(LED_PIN, HIGH);
+
     /* Measure VCC */
     log_Vcc();
   
     /* Sleep */
     delay(idle_time);
+
+    /* Light Activity LED */
+    digitalWrite(LED_PIN, LOW);
     
     return STATE_TEMP;
 }
@@ -101,6 +111,16 @@ static state_t read_sensor_uv(void){
     /* Take Measurement */
     log_analog_reading(ID_UV, UV_PIN);
     
+    return STATE_LIGHT;
+}
+
+
+/* Read Light Sensor State */
+static state_t read_sensor_light(void){
+
+    /* Take Measurement */
+    log_analog_reading(ID_LIGHT, LIGHT_PIN);
+    
     return STATE_LOW_LIGHT;
 }
 
@@ -111,15 +131,15 @@ static state_t read_sensor_low_light(void){
     /* Take Measurement */
     log_analog_reading(ID_LOW_LIGHT, LOW_LIGHT_PIN);
     
-    return STATE_LIGHT;
+    return STATE_V_LOW_LIGHT;
 }
 
 
-/* Read Light Sensor State */
-static state_t read_sensor_light(void){
+/* Read Very Low Light Sensor State */
+static state_t read_sensor_v_low_light(void){
 
     /* Take Measurement */
-    log_analog_reading(ID_LIGHT, LIGHT_PIN);
+    log_analog_reading(ID_V_LOW_LIGHT, V_LOW_LIGHT_PIN);
     
     return STATE_WIND;
 }

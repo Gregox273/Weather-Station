@@ -13,7 +13,9 @@ void logging_setup(uint8_t cs_pin) {
   
     /* SD Card Init - Blocking */
     while(!SD.begin(cs_pin)) {
-        Serial.println("SD Card Not Found!");
+        digitalWrite(LED_PIN, LOW);
+        delay(50);
+        digitalWrite(LED_PIN, HIGH);
     } 
     return;
 }
@@ -33,15 +35,11 @@ void log_data(uint8_t id, uint8_t* buff, uint8_t len){
     
     
     /* Write Data to Log File */
-    logFile = SD.open("log.bin", FILE_WRITE);
-    if (logFile) {
-      logFile.write(id);
-      logFile.write(time_data, 4);
-      logFile.write(buff, len);
-      logFile.close();
-    } else {
-      Serial.println("Error Writing to File");
-    }
+    logFile = SD.open("log.bin", FILE_WRITE);   
+    logFile.write(id);
+    logFile.write(time_data, 4);
+    logFile.write(buff, len);
+    logFile.close();
 
     /* Vomit Over USB */
     if(tx_flag) {
@@ -73,13 +71,9 @@ void log_event(uint8_t event){
     
     /* Write Data to Log File */
     logFile = SD.open("log.bin", FILE_WRITE);
-    if (logFile) {
-      logFile.write(event);
-      logFile.write(time_data, 4);
-      logFile.close();
-    } else {
-      Serial.println("Error Writing to File");
-    }
+    logFile.write(event);
+    logFile.write(time_data, 4);
+    logFile.close();
 
     /* Vomit Over USB */
     if(tx_flag) {
@@ -103,7 +97,5 @@ void dump_sd(void) {
       
       logFile.close();
     
-    } else {      
-      Serial.println("Error Dumping File");
     }
 }
