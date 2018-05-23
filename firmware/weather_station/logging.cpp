@@ -99,3 +99,10 @@ void dump_sd(void) {
     
     }
 }
+
+
+/* Delete Log File  */
+void wipe_sd(void) {
+
+    SD.remove("log.bin");
+}

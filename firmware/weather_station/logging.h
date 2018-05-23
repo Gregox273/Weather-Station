@@ -19,6 +19,7 @@
 #define TX_ENABLE       0x85
 #define TX_DISABLE      0x86
 #define SD_DUMP         0x87
+#define SD_WIPE         0x88
 
 /* LED Pin */
 #define LED_PIN   2
@@ -27,6 +28,7 @@ void logging_setup(uint8_t cs_pin);
 void log_event(uint8_t event);
 void log_data(uint8_t id, uint8_t* buff, uint8_t len);
 void dump_sd(void);
+void wipe_sd(void);
 
 extern bool tx_flag;
 

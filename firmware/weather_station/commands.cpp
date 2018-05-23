@@ -26,6 +26,12 @@ void check_commands(void) {
               dump_sd();
               break;
           
+          case CMD_SD_WIPE:
+              wipe_sd();
+              log_event(SD_WIPE);
+              break;
+              
+          
            case CMD_TX_ENABLE:
            
               log_event(TX_ENABLE);  

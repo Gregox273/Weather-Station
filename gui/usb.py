@@ -29,7 +29,10 @@ def run(gui_pipe, log_pipe, gui_exit):
     time.sleep(3)  # Give arduino time to reset
     if args.debug:
         print("Debug mode activated, incoming serial:")
-
+        
+        # Open session log
+        out = open('session_log.bin','wb') 
+    
     serial_buffer = bytearray()
 
     while not gui_exit.is_set():
@@ -57,7 +60,9 @@ def run(gui_pipe, log_pipe, gui_exit):
                 continue
             if args.debug:
                 # In debug mode, print incoming bytes to terminal
+                # and also to the session log file
                 #print(byte_in.decode('utf-8'), end='')
+                out.write(byte_in)
                 print(byte_in)
             else:
                 serial_buffer.extend(byte_in)

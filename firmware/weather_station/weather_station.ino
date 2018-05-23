@@ -2,7 +2,11 @@
 #include "wind.h"
 #include "commands.h"
 #include "logging.h"
+#include "LowPower.h"
 #include "analog_sensors.h"
+
+/* Sleep Function */
+void go_to_sleep(uint32_t sleep_time);
 
 /* State Machine Definitions */
 typedef enum {
@@ -34,7 +38,7 @@ state_t run_state(state_t cur_state){
 };
 
 /* Global Variables */
-uint32_t idle_time = 1000;
+uint32_t idle_time = 30;
 bool tx_flag = false;
 
 
@@ -85,8 +89,8 @@ static state_t do_state_idle(void){
     /* Measure VCC */
     log_Vcc();
   
-    /* Sleep */
-    delay(idle_time);
+    /* Sleep - Time in Seconds */
+    go_to_sleep(idle_time);
 
     /* Light Activity LED */
     digitalWrite(LED_PIN, LOW);
@@ -152,4 +156,17 @@ static state_t read_sensor_wind(void){
     log_wind_reading();
     
     return STATE_IDLE;
+}
+
+
+/* Go to Sleep */
+void go_to_sleep(uint32_t sleep_time){
+
+    uint32_t num_secs = 0;
+
+    while(num_secs<sleep_time){
+    
+        LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
+        num_secs += 1;
+    }
 }
