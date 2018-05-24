@@ -71,17 +71,48 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         super().__init__(parent)
         self.setupUi(self)
 
-        # Add slots and signals manually:
+        # Configure plots
+        # Overview page
+        self.plot_temp_O = self.graphicsLayoutWidgetTemp_O.addPlot(
+            title='Temperature',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_wind_O = self.graphicsLayoutWidgetWind_O.addPlot(
+            title='Wind Speed',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_light_O = self.graphicsLayoutWidgetLight_O.addPlot(
+            title='Light Levels',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_uv_O = self.graphicsLayoutWidgetUV_O.addPlot(
+            title='UV Index',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+
+        # Individual tabs
+        self.plot_temp = self.graphicsLayoutWidgetTemp.addPlot(
+            title='Temperature',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_wind = self.graphicsLayoutWidgetWind.addPlot(
+            title='Wind Speed',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_light = self.graphicsLayoutWidgetLight.addPlot(
+            title='Light Levels',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_uv = self.graphicsLayoutWidgetUV.addPlot(
+            title='UV Index',
+            axisItems={'bottom': TimeAxisItem(orientation='bottom')})
 
         # Update thread, don't start yet
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
         self.update_thread = MainThd(thread_end, usb_pipe, log_pipe)
         self.connect(self.update_thread, SIGNAL("new_packet(PyQt_PyObject)"),self.new_packet)
 
+        # Add slots and signals manually:
         self.pushButtonDumpSD.clicked.connect(self.dump_sd)
+        self.radioButtonLiveData.clicked.connect(lambda: self.toggle_live_data(self.radioButtonLiveData.isChecked()))
         self.pushButtonUpdateRTC.clicked.connect(self.update_rtc)
         self.pushButtonSetIdle.clicked.connect(lambda: self.set_idle(self.spinBoxIdleTime.value()))
-        self.radioButtonLiveData.clicked.connect(lambda: self.toggle_live_data(self.radioButtonLiveData.isChecked()))
+
+
+
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
 

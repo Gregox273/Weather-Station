@@ -15,18 +15,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="1" alignment="Qt::AlignTop">
+    <item row="0" column="1">
      <widget class="QWidget" name="widgetButtons" native="true">
       <property name="minimumSize">
        <size>
         <width>140</width>
-        <height>200</height>
+        <height>400</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>200</height>
+        <height>400</height>
        </size>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -44,6 +44,13 @@
         </widget>
        </item>
        <item>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QRadioButton" name="radioButtonLiveData">
          <property name="minimumSize">
           <size>
@@ -53,6 +60,99 @@
          </property>
          <property name="text">
           <string>Show Live Data</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelGoingBack">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Going back:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="spinBoxGoingBack">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="suffix">
+          <string>min</string>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Historic Data:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelHistoricFrom">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>From:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateTimeEdit" name="dateTimeEditHistoricFrom">
+         <property name="displayFormat">
+          <string>HH:mm dd/MM/yyyy</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelHistoricTo">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>To:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateTimeEdit" name="dateTimeEditHistoricTo">
+         <property name="displayFormat">
+          <string>HH:mm dd/MM/yyyy</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
@@ -83,6 +183,18 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="labelIdleTime">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Idle time:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QSpinBox" name="spinBoxIdleTime">
          <property name="minimumSize">
           <size>
@@ -91,16 +203,16 @@
           </size>
          </property>
          <property name="suffix">
-          <string>ms</string>
+          <string>s</string>
          </property>
          <property name="maximum">
           <number>999999999</number>
          </property>
          <property name="singleStep">
-          <number>100</number>
+          <number>1</number>
          </property>
          <property name="value">
-          <number>1000</number>
+          <number>1</number>
          </property>
         </widget>
        </item>
@@ -115,6 +227,11 @@
         <height>300</height>
        </size>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="tabPosition">
        <enum>QTabWidget::West</enum>
       </property>
@@ -124,13 +241,16 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
+      <property name="movable">
+       <bool>true</bool>
+      </property>
       <widget class="QWidget" name="tabOverview">
        <attribute name="title">
         <string>Overview</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="1" column="0">
-         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetUV_O">
+        <item row="0" column="0">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetTemp_O">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -139,8 +259,8 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetTemp_O">
+        <item row="1" column="0">
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetUV_O">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -161,6 +281,86 @@
         </item>
         <item row="0" column="1">
          <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetWind_O">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabTemperature">
+       <attribute name="title">
+        <string>Temperature</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetTemp">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabWind">
+       <attribute name="title">
+        <string>Windspeed</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetWind">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabLight">
+       <attribute name="title">
+        <string>Light</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetLight">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabUV">
+       <attribute name="title">
+        <string>UV</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="GraphicsLayoutWidget" name="graphicsLayoutWidgetUV">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -218,6 +418,10 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionWipe_SD_Card"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_Terminal"/>
+    <addaction name="actionExport_Database"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSerial"/>
@@ -251,6 +455,21 @@
    </property>
    <property name="text">
     <string>Download Data from SD</string>
+   </property>
+  </action>
+  <action name="actionWipe_SD_Card">
+   <property name="text">
+    <string>Wipe SD Card</string>
+   </property>
+  </action>
+  <action name="actionSave_Terminal">
+   <property name="text">
+    <string>Save Terminal</string>
+   </property>
+  </action>
+  <action name="actionExport_Database">
+   <property name="text">
+    <string>Export Database</string>
    </property>
   </action>
  </widget>
