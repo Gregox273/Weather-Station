@@ -78,7 +78,7 @@ class Log_Packet(object):
 
     @classmethod
     def construct(cls, input_struct=bytes(LOG_PCKT_LEN)):
-    """Construct class from binary data"""
+        """Construct class from binary data"""
         meta_data = struct.unpack('<BIH', input_struct[0:LOG_PCKT_LEN])
         return cls(meta_data[0], meta_data[1], meta_data[2], input_struct)
 
@@ -121,7 +121,7 @@ class Event(object):
 
     @classmethod
     def construct(cls, input_struct=bytes(EVENT_PCKT_LEN)):
-    """Construct class from binary data"""
+        """Construct class from binary data"""
         meta_data = struct.unpack('<BI', input_struct[0:EVENT_PCKT_LEN])
         return cls(meta_data[0], meta_data[1], input_struct)
 

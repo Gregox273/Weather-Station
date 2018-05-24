@@ -5,7 +5,7 @@ from .packets import *
 
 script_dir = os.path.dirname(__file__)
 
-def run(usb_pipe, gui_exit, log_dir):
+def run(usb_pipe, gui_pipe, gui_exit, log_dir):
     # Set up sqlite3 database on hard drive
     try:
         os.makedirs(os.path.abspath(os.path.join(script_dir,log_dir)), exist_ok=True)
@@ -16,13 +16,7 @@ def run(usb_pipe, gui_exit, log_dir):
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS log_table(timestamp INTEGER NOT NULL,
                                                  id INTEGER(3) NOT NULL,
-                                                 payload_16 SMALLINT,
-                                                 lat DECIMAL(9,6),
-                                                 lon DECIMAL(9,6),
-                                                 height DECIMAL(5,3),
-                                                 gps_time INTEGER,
-                                                 num_sat INTEGER(3),
-                                                 CONSTRAINT Packet_ID PRIMARY KEY (timestamp, id))
+                                                 payload_16 SMALLINT)
         ''')
         db.commit()
     except Exception as e:
@@ -37,20 +31,15 @@ def run(usb_pipe, gui_exit, log_dir):
             new_pkt = usb_pipe.recv()
             try:
                 with db:
-                    if new_pkt.id == Identifier.GPS:
+                    if id in Log_PCKT_LIST:
                         db.execute('''INSERT INTO log_table(timestamp, id,
-                                lat, lon, height, gps_time, num_sat)
-                                VALUES(?,?,?,?,?,?,?)''',
-                                (new_pkt.timestamp, new_pkt.identifier,
-                                new_pkt.latitude, new_pkt.longitude,
-                                new_pkt.height, new_pkt.gps_time))
-                    else:
-                        # Generic adc reading
-                        db.execute('''INSERT INTO log_table(timestamp, id,
-                                payload)
+                                payload_16)
                                 VALUES(?,?,?)''',
-                                (new_pkt.timestamp, new_pkt.identifier,
-                                new_pkt.payload))
+                                (new_pkt.timestamp, new_pkt.id,new_pkt.payload))
+                    elif id in EVENT_PCKT_LIST:
+                        db.execute('''INSERT INTO log_table(timestamp, id)
+                                VALUES(?,?)''',
+                                (new_pkt.timestamp, new_pkt.id))
             except sqlite3.IntegrityError:
                 # Record already exists
                 pass
@@ -58,3 +47,7 @@ def run(usb_pipe, gui_exit, log_dir):
                 db.close()
 
         # Check for commands from GUI
+        if gui_pipe.poll():
+            from_gui = gui+pipe.recv()
+            if isinstance(from_gui,DB_Request):
+                    self.usb_pipe.send(new_packet_window)

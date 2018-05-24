@@ -114,7 +114,7 @@ class Ui_WeatherStation(object):
         self.spinBoxIdleTime.setProperty("value", 1)
         self.spinBoxIdleTime.setObjectName(_fromUtf8("spinBoxIdleTime"))
         self.verticalLayout.addWidget(self.spinBoxIdleTime)
-        self.gridLayout_3.addWidget(self.widgetButtons, 0, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.widgetButtons, 0, 1, 1, 1, QtCore.Qt.AlignTop)
         self.main_tab_widget = QtGui.QTabWidget(self.centralwidget)
         self.main_tab_widget.setMinimumSize(QtCore.QSize(300, 300))
         font = QtGui.QFont()
