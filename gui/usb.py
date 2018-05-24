@@ -29,10 +29,10 @@ def run(gui_pipe, log_pipe, gui_exit):
     time.sleep(3)  # Give arduino time to reset
     if args.debug:
         print("Debug mode activated, incoming serial:")
-        
+
         # Open session log
-        out = open('session_log.bin','wb') 
-    
+        out = open('session_log.bin','wb')
+
     serial_buffer = bytearray()
 
     while not gui_exit.is_set():
@@ -72,13 +72,13 @@ def run(gui_pipe, log_pipe, gui_exit):
                     if id in LOG_PCKT_LIST:
                         length = LOG_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
-                            message = Log_Packet(serial_buffer[0:length])
+                            message = Log_Packet.construct(serial_buffer[0:length])
                             gui_pipe.send(message)
                             log_pipe.send(message)
                     elif id in EVENT_PCKT_LIST:
                         length = EVENT_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
-                            message = Event_Packet(serial_buffer[0:length])
+                            message = Event_Packet.construct(serial_buffer[0:length])
                             gui_pipe.send(message)
                             log_pipe.send(message)
                     else:

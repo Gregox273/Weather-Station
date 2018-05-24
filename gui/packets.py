@@ -40,21 +40,47 @@ CMD_PCKT_LIST = { 0x11: ["Request_dump", 2],     # Request sd card data dump
                   0x81: ["Start_tx", 2],         # Start sending live sensor data
                   0x18: ["Stop_tx", 2],          # Stop sending lve sensor data
                   0x88: ["RTC_update", 6],       # Current unix time in s
-                  0x44: ["Idle_time_update", 6]  # Desired idle time in us
+                  0x44: ["Idle_time_update", 6],  # Desired idle time in us
+                  0x28: ["SD Wipe",2]  # Wipe the SD card
 }  # List of command packets {id: ["Name", length in bytes]}
 cmd_pckt_names = [i[0] for i in list(CMD_PCKT_LIST.values())]
 
 
+# class Log_Packet(object):
+#     """Log packet, containing timestamp, id and sensor reading"""
+#     def __init__(self, input_struct=bytes(LOG_PCKT_LEN)):
+#         self.data_struct = input_struct
+#         meta_data = struct.unpack('<BIH', self.data_struct[0:LOG_PCKT_LEN])
+#         self.id = meta_data[0]  # Identifier, single byte (uint8)
+#         self.timestamp = meta_data[1] # Seconds (UNIX), 4 byte uint
+#         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
+#             strftime('%H:%M:%S %d-%m-%Y')
+#         self.payload = meta_data[2]  # Sensor reading (uint16)
+#
+#     @classmethod
+#     def construct(cls, id, timestamp, payload):
+#     """Construct class by direct field entries"""
+#         packed_bytes = struct.pack('<BIH', id, timestamp, payload)
+#         return cls(packed_bytes)
+
 class Log_Packet(object):
     """Log packet, containing timestamp, id and sensor reading"""
-    def __init__(self, input_struct=bytes(LOG_PCKT_LEN)):
-        self.data_struct = input_struct
-        meta_data = struct.unpack('<BIH', self.data_struct[0:LOG_PCKT_LEN])
-        self.id = meta_data[0]  # Identifier, single byte (uint8)
-        self.timestamp = meta_data[1] # Seconds (UNIX), 4 byte uint
+    def __init__(self, id, timestamp, payload, packed=None):
+        if packed:
+            self.data_struct = packed
+        else:
+            self.data_struct = struct.pack('<BIH', id, timestamp, payload)
+        self.id = id  # Identifier, single byte (uint8)
+        self.timestamp = timestamp  # Seconds (UNIX), 4 byte uint
         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
             strftime('%H:%M:%S %d-%m-%Y')
-        self.payload = meta_data[2]  # Sensor reading (uint16)
+        self.payload = payload  # Sensor reading (uint16)
+
+    @classmethod
+    def construct(cls, input_struct=bytes(LOG_PCKT_LEN)):
+    """Construct class from binary data"""
+        meta_data = struct.unpack('<BIH', input_struct[0:LOG_PCKT_LEN])
+        return cls(meta_data[0], meta_data[1], meta_data[2], input_struct)
 
     def printout(self,textbox):
         # Method to print packet to terminal within the GUI
@@ -65,16 +91,39 @@ class Log_Packet(object):
          textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
          textbox.insertPlainText("Payload: {}\n".format(self.payload))
 
+# class Event(object):
+#     """Event packet"""
+#     def __init__(self,input_struct=bytes(EVENT_PCKT_LEN)):
+#         self.data_struct = input_struct
+#         meta_data = struct.unpack('<BI', self.data_struct[0:EVENT_PCKT_LEN])
+#         self.id = meta_data[0]  # Identifier, single byte (uint8)
+#         self.timestamp = meta_data[1] # Seconds (UNIX), 4 byte uint
+#         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
+#             strftime('%H:%M:%S %d-%m-%Y')
+#
+#     @classmethod
+#     def construct(cls, id, timestamp):
+#     """Construct class by direct field entries"""
+#         packed_bytes = struct.pack('<BI', id, timestamp)
+#         return cls(packed_bytes)
+
 class Event(object):
     """Event packet"""
-    def __init__(self,input_struct=bytes(EVENT_PCKT_LEN)):
-        self.data_struct = input_struct
-        meta_data = struct.unpack('<BI', self.data_struct[0:EVENT_PCKT_LEN])
-        self.id = meta_data[0]  # Identifier, single byte (uint8)
-        self.timestamp = meta_data[1] # Seconds (UNIX), 4 byte uint
+    def __init__(self, id, timestamp, packed=None):
+        if packed:
+            self.data_struct = packed
+        else:
+            self.data_struct = struct.pack('<BI', id, timestamp)
+        self.id = id  # Identifier, single byte (uint8)
+        self.timestamp = timestamp  # Seconds (UNIX), 4 byte uint
         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
             strftime('%H:%M:%S %d-%m-%Y')
 
+    @classmethod
+    def construct(cls, input_struct=bytes(EVENT_PCKT_LEN)):
+    """Construct class from binary data"""
+        meta_data = struct.unpack('<BI', input_struct[0:EVENT_PCKT_LEN])
+        return cls(meta_data[0], meta_data[1], input_struct)
 
     def printout(self,textbox):
         # Method to print packet to terminal within the GUI
@@ -114,8 +163,14 @@ class Idle_Time_Packet(Cmd_Packet):
         self.packed_bytes = struct.pack('<BBI', WAKEUP_BYTE, self.cmd, self.idle_time)
         return self.packed_bytes
 
-### Internal to ground station ###
+############ Internal to ground station ############
 class Usb_command(object):
     """Command (from GUI to USB process) to enable/disable serial connection"""
     def __init__(self,conn):
         self.conn = conn
+
+class DB_Request(object):
+    """Command to request logs from logging process that fall within start and end timestamps"""
+    def __init__(self,start,end):
+        self.start_time = start
+        self.end_time = end
