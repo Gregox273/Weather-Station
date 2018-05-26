@@ -16,6 +16,8 @@ from timeit import default_timer as timer
 from math import floor
 import pyqtgraph as pg
 import datetime
+import sqlite3
+import numpy as np
 
 script_dir = os.path.dirname(__file__)
 
@@ -61,7 +63,7 @@ class MainThd(QThread):
 
 class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     """Inherit main window generated in QT4 Designer"""
-    def __init__(self, usb_pipe, log_pipe, db, parent=None):
+    def __init__(self, usb_pipe, log_pipe, conn, cursor, db_filepath, parent=None):
 
         # Graphs - enable antialiasing
         pg.setConfigOptions(antialias=True,  # Enable antialiasing
@@ -112,7 +114,9 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.pushButtonSetIdle.clicked.connect(lambda: self.set_idle(self.spinBoxIdleTime.value()))
 
         # Add db
-        self.db = db
+        self.db_conn = conn
+        self.db_cursor = cursor
+        self.db_filepath = db_filepath  # For creating new temporary connections
 
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
@@ -144,6 +148,25 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # Print to terminal tab
         packet.printout(self.textBrowser_terminal)
 
+        if self.radioButtonLiveData.isChecked():
+            # Display live data
+            go_back = self.spinBoxGoingBack.value()*60  # Go back this many seconds on live graph
+
+            # Fetch temperatures
+            self.db_cursor.execute(
+                'SELECT timestamp, payload_16 from log_table WHERE timestamp >= {t} AND id == {i})'.\
+                format(t = int(round(time.time())) - go_back, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")]))
+            temperatures = self.db_cursor.fetchall()
+            temperatures = np.asarray(temperatures)
+            self.plot_temp_O.plot(temperatures, clear = True)
+            self.plot_temp.plot(temperatures, clear = True)
+
+            # Fetch wind speed
+
+            # Fetch Light
+
+            # Fetch UV
+
     def set_text(self,text,lineedit):
         lineedit.setText(str(text))
         lineedit.home(False)  # Return cursor to start so most significant digits displayed
@@ -155,10 +178,17 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         file.write(text)
         file.close()
 
-def run(usb_pipe, log_pipe, gui_exit,db):
+def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     app = QtGui.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('icon.png'))
-    main_window = gcs_main_window(usb_pipe, log_pipe,db)
+
+    db_conn = sqlite3.connect(db_filepath)
+    db_cursor = db_conn.cursor()
+
+    main_window = gcs_main_window(usb_pipe, log_pipe,db_conn, db_cursor,db_filepath)
     main_window.show()
+
     app.exec_()
+
+    db_conn.close()
     gui_exit.set()

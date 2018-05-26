@@ -47,11 +47,13 @@ def run():
 
         db = sqlite3.connect(db_filepath)
         cursor = db.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS log_table(timestamp INTEGER NOT NULL,
-                                                 id INTEGER(3) NOT NULL,
-                                                 payload_16 SMALLINT)
-        ''')
+        cursor.executescript("""
+            DROP TABLE log_table;
+            CREATE TABLE log_table(
+                timestamp INTEGER NOT NULL,
+                id INTEGER(3) NOT NULL,
+                payload_16 SMALLINT);
+        """)
         db.commit()
     except Exception as e:
         db.rollback()
@@ -61,13 +63,13 @@ def run():
 
     print("Starting processes...")
     # Start gui/main process
-    gui_process = multiprocessing.Process(target=gui_interface.run, args=(gui_usb_pipe, gui_log_pipe, gui_exit, db))
+    gui_process = multiprocessing.Process(target=gui_interface.run, args=(gui_usb_pipe, gui_log_pipe, gui_exit, db_filepath))
     gui_process.start()
 
     print("Running...")
 
     # Start logging process
-    log_process = multiprocessing.Process(target=logging.run, args=(log_usb_pipe, log_gui_pipe, gui_exit, log_dir, db))
+    log_process = multiprocessing.Process(target=logging.run, args=(log_usb_pipe, log_gui_pipe, gui_exit, log_dir, db_filepath))
     log_process.start()
 
     # Start usb parsing process
