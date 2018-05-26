@@ -27,8 +27,8 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
-def int2dt(ts, ts_mult=1e6):
-    return(datetime.datetime.utcfromtimestamp(float(ts)/ts_mult))
+def int2dt(ts):
+    return(datetime.datetime.utcfromtimestamp(float(ts)))
 
 class TimeAxisItem(pg.AxisItem):
     def __init__(self, *args, **kwargs):
@@ -49,9 +49,9 @@ class MainThd(QThread):
 
     def run(self):
         while True:
-            if self.usb_pipe.poll(0.05):
-                new_packet_usb = self.usb_pipe.recv()
-                self.emit(SIGNAL('new_packet(PyQt_PyObject)'),new_packet_usb)
+            if self.log_pipe.poll(0.05):
+                new_packet_from_log = self.log_pipe.recv()
+                self.emit(SIGNAL('new_packet(PyQt_PyObject)'),new_packet_from_log)
 
             if self.window_pipe.poll(0.05):
                 new_packet_window = self.window_pipe.recv()
@@ -122,6 +122,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.update_thread.start(QThread.LowPriority)
 
     def dump_sd(self):
+        self.radioButtonLiveData.setChecked(False)  # Don't plot the sd dump
+        # Maybe add a dump_in_progress flag so it cannot be rechecked until completion?
         cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Request_dump")]
         cmd = Cmd_Packet(cmd_id)
         self.gui_end.send(cmd)
@@ -151,21 +153,45 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         if self.radioButtonLiveData.isChecked():
             # Display live data
             go_back = self.spinBoxGoingBack.value()*60  # Go back this many seconds on live graph
+            new_id = LOG_PCKT_LIST.get(id)[0]
 
-            # Fetch temperatures
-            self.db_cursor.execute(
-                'SELECT timestamp, payload_16 from log_table WHERE timestamp >= {t} AND id == {i})'.\
-                format(t = int(round(time.time())) - go_back, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")]))
-            temperatures = self.db_cursor.fetchall()
-            temperatures = np.asarray(temperatures)
-            self.plot_temp_O.plot(temperatures, clear = True)
-            self.plot_temp.plot(temperatures, clear = True)
+            if new_id == "Temperature":
+                # Fetch temperatures
+                self.update_temp(int(round(time.time())) - go_back, 2147483647)
+                # self.db_cursor.execute(
+                #     'SELECT timestamp, payload_16 from log_table WHERE timestamp >= {t} AND id == {i})'.\
+                #     format(t = ) - go_back, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")]))
+                # temperatures = self.db_cursor.fetchall()
+                # temperatures = np.asarray(temperatures)
+                #
+                # self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
+                # self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
-            # Fetch wind speed
+            elif new_id == "Windspeed":
+                # Fetch wind speed
+                #self.update_wind(int(round(time.time())) - go_back, 2147483647)
+                pass
 
-            # Fetch Light
+            elif new_id in ("Light, Low_Light, V_Low_Light"):
+                # Fetch Light
+                #self.update_light(int(round(time.time())) - go_back, 2147483647)
+                pass
 
-            # Fetch UV
+            elif new_id == "UV":
+                # Fetch UV
+                #self.update_UV(int(round(time.time())) - go_back, 2147483647)
+                pass
+
+    def update_temp(self,start,end):
+        # Fetch temperatures and plot them
+        self.db_cursor.execute(
+            'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i})'.\
+            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")]))
+        temperatures = self.db_cursor.fetchall()
+        temperatures = np.asarray(temperatures)
+
+        self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
+        self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
     def set_text(self,text,lineedit):
         lineedit.setText(str(text))
@@ -185,7 +211,7 @@ def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     db_conn = sqlite3.connect(db_filepath)
     db_cursor = db_conn.cursor()
 
-    main_window = gcs_main_window(usb_pipe, log_pipe,db_conn, db_cursor,db_filepath)
+    main_window = gcs_main_window(usb_pipe, log_pipe, db_conn, db_cursor,db_filepath)
     main_window.show()
 
     app.exec_()

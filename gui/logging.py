@@ -28,11 +28,12 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath):
                 pass
             #finally:
                 #db.close()
+            gui_pipe.send(new_pkt)
 
         # Check for commands from GUI
         if gui_pipe.poll():
-            from_gui = gui+pipe.recv()
-            if isinstance(from_gui,DB_Request):
-                    self.usb_pipe.send(new_packet_window)
+            from_gui = gui_pipe.recv()
+            # Respond to command here
+            pass
 
     db.close()

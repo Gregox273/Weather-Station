@@ -168,9 +168,3 @@ class Usb_command(object):
     """Command (from GUI to USB process) to enable/disable serial connection"""
     def __init__(self,conn):
         self.conn = conn
-
-class DB_Request(object):
-    """Command to request logs from logging process that fall within start and end timestamps"""
-    def __init__(self,start,end):
-        self.start_time = start
-        self.end_time = end

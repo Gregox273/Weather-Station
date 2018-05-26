@@ -73,13 +73,13 @@ def run(gui_pipe, log_pipe, gui_exit):
                         length = LOG_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
                             message = Log_Packet.construct(serial_buffer[0:length])
-                            gui_pipe.send(message)
+                            #gui_pipe.send(message)
                             log_pipe.send(message)
                     elif id in EVENT_PCKT_LIST:
                         length = EVENT_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
                             message = Event_Packet.construct(serial_buffer[0:length])
-                            gui_pipe.send(message)
+                            #gui_pipe.send(message)
                             log_pipe.send(message)
                     else:
                         # Unrecognised packet, empty buffer
