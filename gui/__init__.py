@@ -7,6 +7,9 @@ from . import gui_interface
 from . import logging
 import time
 import sys
+import os
+import sqlite3
+from .packets import *
 
 import signal
 
@@ -35,15 +38,36 @@ def run():
     gui_exit = multiprocessing.Event()# Flag for gui exit
     gui_exit.clear()
 
+    # Set up sqlite3 database on hard drive
+    script_dir = os.path.dirname(__file__)
+    log_dir = "../logs"
+    try:
+        os.makedirs(os.path.abspath(os.path.join(script_dir,log_dir)), exist_ok=True)
+        db_filepath = os.path.abspath(os.path.join(script_dir,log_dir,"datalogger_db"))
+
+        db = sqlite3.connect(db_filepath)
+        cursor = db.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS log_table(timestamp INTEGER NOT NULL,
+                                                 id INTEGER(3) NOT NULL,
+                                                 payload_16 SMALLINT)
+        ''')
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise # -*- coding: utf-8 -*-
+    finally:
+        db.close()
+
     print("Starting processes...")
     # Start gui/main process
-    gui_process = multiprocessing.Process(target=gui_interface.run, args=(gui_usb_pipe, gui_log_pipe, gui_exit))
+    gui_process = multiprocessing.Process(target=gui_interface.run, args=(gui_usb_pipe, gui_log_pipe, gui_exit, db))
     gui_process.start()
 
     print("Running...")
 
     # Start logging process
-    log_process = multiprocessing.Process(target=logging.run, args=(log_usb_pipe, log_gui_pipe, gui_exit, "../logs"))
+    log_process = multiprocessing.Process(target=logging.run, args=(log_usb_pipe, log_gui_pipe, gui_exit, log_dir, db))
     log_process.start()
 
     # Start usb parsing process

@@ -5,25 +5,8 @@ from .packets import *
 
 script_dir = os.path.dirname(__file__)
 
-def run(usb_pipe, gui_pipe, gui_exit, log_dir):
-    # Set up sqlite3 database on hard drive
-    try:
-        os.makedirs(os.path.abspath(os.path.join(script_dir,log_dir)), exist_ok=True)
-        db_filepath = os.path.abspath(os.path.join(script_dir,log_dir,"datalogger_db"))
+def run(usb_pipe, gui_pipe, gui_exit, log_dir, db):
 
-        db = sqlite3.connect(db_filepath)
-        cursor = db.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS log_table(timestamp INTEGER NOT NULL,
-                                                 id INTEGER(3) NOT NULL,
-                                                 payload_16 SMALLINT)
-        ''')
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise # -*- coding: utf-8 -*-
-    finally:
-        db.close()
 
     while not gui_exit.is_set():
         # Main loop, add incoming packets to database

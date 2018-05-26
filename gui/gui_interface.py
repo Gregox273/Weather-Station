@@ -61,7 +61,7 @@ class MainThd(QThread):
 
 class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     """Inherit main window generated in QT4 Designer"""
-    def __init__(self, usb_pipe, log_pipe, parent=None):
+    def __init__(self, usb_pipe, log_pipe, db, parent=None):
 
         # Graphs - enable antialiasing
         pg.setConfigOptions(antialias=True,  # Enable antialiasing
@@ -111,7 +111,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.pushButtonUpdateRTC.clicked.connect(self.update_rtc)
         self.pushButtonSetIdle.clicked.connect(lambda: self.set_idle(self.spinBoxIdleTime.value()))
 
-
+        # Add db
+        self.db = db
 
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
@@ -154,10 +155,10 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         file.write(text)
         file.close()
 
-def run(usb_pipe, log_pipe, gui_exit):
+def run(usb_pipe, log_pipe, gui_exit,db):
     app = QtGui.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('icon.png'))
-    main_window = gcs_main_window(usb_pipe, log_pipe)
+    main_window = gcs_main_window(usb_pipe, log_pipe,db)
     main_window.show()
     app.exec_()
     gui_exit.set()
