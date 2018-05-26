@@ -110,6 +110,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # Add slots and signals manually:
         self.pushButtonDumpSD.clicked.connect(self.dump_sd)
         self.radioButtonLiveData.clicked.connect(lambda: self.toggle_live_data(self.radioButtonLiveData.isChecked()))
+        self.dateTimeEditHistoricFrom.dateTimeChanged.connect(self.historic_plot)
+        self.dateTimeEditHistoricTo.dateTimeChanged.connect(self.historic_plot)
         self.pushButtonUpdateRTC.clicked.connect(self.update_rtc)
         self.pushButtonSetIdle.clicked.connect(lambda: self.set_idle(self.spinBoxIdleTime.value()))
 
@@ -118,15 +120,22 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.db_cursor = cursor
         self.db_filepath = db_filepath  # For creating new temporary connections
 
+        # SD dump flag
+        self.DUMP_IN_PROGRESS = False
+
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
 
     def dump_sd(self):
-        self.radioButtonLiveData.setChecked(False)  # Don't plot the sd dump
-        # Maybe add a dump_in_progress flag so it cannot be rechecked until completion?
+        self.DUMP_IN_PROGRESS(True)
         cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Request_dump")]
         cmd = Cmd_Packet(cmd_id)
         self.gui_end.send(cmd)
+
+    def DUMP_IN_PROGRESS(self,arg=None):
+        if arg:
+            self.DUMP_IN_PROGRESS = arg
+        return self.DUMP_IN_PROGRESS
 
     def update_rtc(self):
         cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("RTC_update")]
@@ -150,12 +159,19 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # Print to terminal tab
         packet.printout(self.textBrowser_terminal)
 
-        if self.radioButtonLiveData.isChecked():
+        if packet.id in EVENT_PCKT_LIST:
+            new_name = EVENT_PCKT_LIST.get(packet.id)[0]
+            if new_name == "SD_Dump_End":
+                # SD Dump has ended
+                self.DUMP_IN_PROGRESS(False)
+                return
+
+        if self.radioButtonLiveData.isChecked() and not self.DUMP_IN_PROGRESS():
             # Display live data
             go_back = self.spinBoxGoingBack.value()*60  # Go back this many seconds on live graph
-            new_id = LOG_PCKT_LIST.get(id)[0]
+            new_name = LOG_PCKT_LIST.get(packet.id)[0]
 
-            if new_id == "Temperature":
+            if new_name == "Temperature":
                 # Fetch temperatures
                 self.update_temp(int(round(time.time())) - go_back, 2147483647)
                 # self.db_cursor.execute(
@@ -167,17 +183,17 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
                 # self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
                 # self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
-            elif new_id == "Windspeed":
+            elif new_name == "Windspeed":
                 # Fetch wind speed
                 #self.update_wind(int(round(time.time())) - go_back, 2147483647)
                 pass
 
-            elif new_id in ("Light, Low_Light, V_Low_Light"):
+            elif new_name in ("Light, Low_Light, V_Low_Light"):
                 # Fetch Light
                 #self.update_light(int(round(time.time())) - go_back, 2147483647)
                 pass
 
-            elif new_id == "UV":
+            elif new_name == "UV":
                 # Fetch UV
                 #self.update_UV(int(round(time.time())) - go_back, 2147483647)
                 pass
@@ -192,6 +208,15 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
         self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
         self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
+
+    def historic_plot(self):
+        if not self.radioButtonLiveData.isChecked():
+            # Plot data in historic mode
+            start = int(round(self.dateTimeEditHistoricFrom.dateTime.toMSecsSinceEpoch()/1000))
+            end = int(round(self.dateTimeEditHistoricTo.dateTime.toMSecsSinceEpoch()/1000))
+            self.update_temp(start,end)
+            #self.update_light(start,end)
+            #etc.
 
     def set_text(self,text,lineedit):
         lineedit.setText(str(text))
