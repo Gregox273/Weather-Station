@@ -19,13 +19,15 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath):
                                 payload_16)
                                 VALUES(?,?,?)''',
                                 (new_pkt.timestamp, new_pkt.id,new_pkt.payload))
+                        db.commit()
                     elif id in EVENT_PCKT_LIST:
                         db.execute('''INSERT INTO log_table(timestamp, id)
                                 VALUES(?,?)''',
                                 (new_pkt.timestamp, new_pkt.id))
+                        db.commit()
             except sqlite3.IntegrityError:
                 # Record already exists
-                pass
+                db.rollback()
             #finally:
                 #db.close()
             gui_pipe.send(new_pkt)

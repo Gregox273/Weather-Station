@@ -2,6 +2,7 @@
 Gregory Brooks(gb510), Matt Coates(mc955) 2018
 Includes gist (https://gist.github.com/friendzis/4e98ebe2cf29c0c2c232)
 by friendzis & scls19fr
+and code by Jean-François Fabre (https://stackoverflow.com/questions/39308042/sqlite3-database-tables-export-in-csv)
 """
 from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL, QTimer
@@ -18,6 +19,7 @@ import pyqtgraph as pg
 import datetime
 import sqlite3
 import numpy as np
+import csv
 
 script_dir = os.path.dirname(__file__)
 
@@ -115,6 +117,11 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.pushButtonUpdateRTC.clicked.connect(self.update_rtc)
         self.pushButtonSetIdle.clicked.connect(lambda: self.set_idle(self.spinBoxIdleTime.value()))
 
+        self.actionWipe_SD_Card.triggered.connect(self.wipe_sd)
+        self.actionSave_Terminal.triggered.connect(self.terminal_save)
+        self.actionExport_Database.triggered.connect(self.export_db)
+        self.actionConnect.triggered.connect(self.toggle_con)
+
         # Add db
         self.db_conn = conn
         self.db_cursor = cursor
@@ -149,11 +156,10 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
     def toggle_live_data(self, on):
         if on:
-            cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Start_tx")]
+            self.send_cmd("Start_tx")
         else:
-            cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Stop_tx")]
-        cmd = Cmd_Packet(cmd_id)
-        self.gui_end.send(cmd)
+            self.historic_plot()
+            self.send_cmd("Stop_tx")
 
     def new_packet(self, packet):
         # Print to terminal tab
@@ -225,9 +231,63 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     def terminal_save(self):
         name = QtGui.QFileDialog.getSaveFileName(self,'Save File')
         file = open(name,'w')
-        text = self.textBrowser_terminal.toPlainText()
-        file.write(text)
+        file.write(self.textBrowser_terminal.toPlainText())
         file.close()
+
+    def wipe_sd(self):
+        choice = QtGui.QMessageBox.question(self, 'Wipe SD Card',
+                                            "Are you sure?",
+                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        if choice == QtGui.QMessageBox.Yes:
+            print("Wiping SD Card")
+            self.send_cmd("SD_Wipe")
+        else:
+            pass
+
+    def export_db(self):
+        # First check whether database is empty
+        self.db_cursor.execute("SELECT exists(SELECT 1 from log_table);")
+        n = self.db_cursor.fetchall()
+        if n[0][0] == 0:
+            # Empty table
+            msg = QtGui.QMessageBox()
+            msg.setIcon(QtGui.QMessageBox.Information)
+            msg.setText("Database is empty!")
+            msg.setWindowTitle("Export Database")
+            msg.setStandardButtons(QtGui.QMessageBox.Ok)
+            #msg.buttonClicked.connect(msgbtn)
+
+            msg.exec_()
+           # print "value of pressed message box button:", retval
+        else:
+            name = QtGui.QFileDialog.getSaveFileName(self,'Export Database')
+            if not name.lower().endswith('.csv'):
+                name = name + '.csv'
+
+            data = self.db_cursor.execute("SELECT * FROM log_table")
+
+            file = open(name,'w',newline="")
+            writer = csv.writer(file,delimiter=';')
+            first_item = next(data)  # get first item to get keys
+            writer.writerow(first_item.keys())  # keys=title you're looking for
+            writer.writerow(first_item)
+            # write the rest
+            writer.writerows(data)
+
+            file.close()
+
+    def toggle_con(self):
+        if self.actionConnect.isChecked():
+            # Connect
+            self.gui_end.send(Usb_command(True))
+        else:
+            # Disconnect
+            self.gui_end.send(Usb_command(False))
+
+    def send_cmd(self,name):
+        cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index(name)]
+        cmd = Cmd_Packet(cmd_id)
+        self.gui_end.send(cmd)
 
 def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     app = QtGui.QApplication(sys.argv)

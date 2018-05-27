@@ -211,6 +211,7 @@ class Ui_WeatherStation(object):
         WeatherStation.setStatusBar(self.statusbar)
         self.actionConnect = QtGui.QAction(WeatherStation)
         self.actionConnect.setCheckable(True)
+        self.actionConnect.setChecked(True)
         self.actionConnect.setObjectName(_fromUtf8("actionConnect"))
         self.actionLive_Sensor_Data = QtGui.QAction(WeatherStation)
         self.actionLive_Sensor_Data.setCheckable(True)

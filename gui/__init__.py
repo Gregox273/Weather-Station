@@ -48,7 +48,7 @@ def run():
         db = sqlite3.connect(db_filepath)
         cursor = db.cursor()
         cursor.executescript("""
-            DROP TABLE log_table;
+            DROP TABLE IF EXISTS log_table;
             CREATE TABLE log_table(
                 timestamp INTEGER NOT NULL,
                 id INTEGER(3) NOT NULL,

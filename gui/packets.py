@@ -42,7 +42,7 @@ CMD_PCKT_LIST = { 0x11: ["Request_dump", 2],     # Request sd card data dump
                   0x18: ["Stop_tx", 2],          # Stop sending lve sensor data
                   0x88: ["RTC_update", 6],       # Current unix time in s
                   0x44: ["Idle_time_update", 6], # Desired idle time in us
-                  0x28: ["SD Wipe",2]            # Wipe the SD card
+                  0x28: ["SD_Wipe",2]            # Wipe the SD card
 }  # List of command packets {id: ["Name", length in bytes]}
 cmd_pckt_names = [i[0] for i in list(CMD_PCKT_LIST.values())]
 
