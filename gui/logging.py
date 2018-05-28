@@ -6,7 +6,7 @@ from .packets import *
 script_dir = os.path.dirname(__file__)
 
 def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath):
-    db = sqlite3.connect(db_filepath, timeout=10)
+    db = sqlite3.connect(db_filepath, timeout=20)
     cursor = db.cursor()
     while not gui_exit.is_set():
         # Main loop, add incoming packets to database

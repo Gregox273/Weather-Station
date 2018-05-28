@@ -150,6 +150,18 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="labelHistoricTo_2">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>(system times)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="Line" name="line_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>

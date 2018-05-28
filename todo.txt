@@ -1,5 +1,12 @@
+- Make sure database is unlocked upon exit!
+- Make sure logging does not hog the database if continuously logging (e.g. from an sd dump). Also make sure export database locks database for minimum time
 - Logs tab to search through database for events and/or logged packets (similar to raw terminal)
+    - Maybe replace terminal tab so that sd dump doesn't slow down the gui
+- Plot uv power as well as index
 - Refresh button for historic view
 - The other graphs
+- Stop live transmit on gui exit
+- y axis labels
+- Arduino does not reliably respond to commands?
 
 - Test everything!

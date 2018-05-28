@@ -43,10 +43,11 @@ def run():
     log_dir = "../logs"
     try:
         os.makedirs(os.path.abspath(os.path.join(script_dir,log_dir)), exist_ok=True)
-        db_filepath = os.path.abspath(os.path.join(script_dir,log_dir,"datalogger_db"))
+        db_filepath = os.path.abspath(os.path.join(script_dir,log_dir,"db/datalogger_db"))
 
-        db = sqlite3.connect(db_filepath,timeout=10)
+        db = sqlite3.connect(db_filepath,timeout=20)
         cursor = db.cursor()
+        cursor.execute('PRAGMA journal_mode=wal')
         cursor.executescript("""
             DROP TABLE IF EXISTS log_table;
             CREATE TABLE log_table(

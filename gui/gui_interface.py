@@ -2,7 +2,7 @@
 Gregory Brooks(gb510), Matt Coates(mc955) 2018
 Includes gist (https://gist.github.com/friendzis/4e98ebe2cf29c0c2c232)
 by friendzis & scls19fr
-and code by Jean-François Fabre (https://stackoverflow.com/questions/39308042/sqlite3-database-tables-export-in-csv)
+and code by Jean-François Fabre & ömer sarı (https://stackoverflow.com/questions/39308042/sqlite3-database-tables-export-in-csv)
 """
 from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL, QTimer
@@ -175,7 +175,6 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             # Display live data
             go_back = self.spinBoxGoingBack.value()*60  # Go back this many seconds on live graph
             new_name = LOG_PCKT_LIST.get(packet.id)[0]
-
             if new_name == "Temperature":
                 # Fetch temperatures
                 self.update_temp(int(round(time.time())) - go_back, 2147483647)
@@ -200,12 +199,12 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
             elif new_name == "UV":
                 # Fetch UV
-                #self.update_UV(int(round(time.time())) - go_back, 2147483647)
+                self.update_UV(int(round(time.time())) - go_back, 2147483647)
                 pass
 
     def update_temp(self,start,end):
         # Fetch temperatures and plot them
-        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i}'.\
+        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
             format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")])
         self.db_cursor.execute(cmd)
         temperatures = self.db_cursor.fetchall()
@@ -218,12 +217,32 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
             self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
+    def update_UV(self,start,end):
+        # Fetch UV measurements and plot them
+        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
+            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("UV")])
+        self.db_cursor.execute(cmd)
+        uv_readings = self.db_cursor.fetchall()
+        if uv_readings:
+            # If not empty
+            uv_readings = np.asarray(uv_readings)
+            uv_readings = uv_readings.astype(float)
+
+            uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
+            uv_index = uv_vout/(4.3*0.026)
+            uv_power = uv_vout/(4.3*0.113)
+            uv = np.column_stack((uv_readings[:,0], uv_index))# uv_power))
+
+            self.plot_uv_O.plot(uv, clear = True,pen=(0,0,255))
+            self.plot_uv.plot(uv, clear = True,pen=(0,0,255))
+
     def historic_plot(self):
         if not self.radioButtonLiveData.isChecked():
             # Plot data in historic mode
             start = int(round(self.dateTimeEditHistoricFrom.dateTime().toTime_t()))
             end = int(round(self.dateTimeEditHistoricTo.dateTime().toTime_t()))
             self.update_temp(start,end)
+            self.update_UV(start,end)
             #self.update_light(start,end)
             #etc.
 
@@ -266,14 +285,16 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             name = QtGui.QFileDialog.getSaveFileName(self,'Export Database')
             if not name.lower().endswith('.csv'):
                 name = name + '.csv'
+            file = open(name,'w',newline="")
+            self.db_conn.row_factory = sqlite3.Row
+            crsr=self.db_conn.execute("SELECT * From log_table")
+            row=crsr.fetchone()
+            titles=row.keys()
 
             data = self.db_cursor.execute("SELECT * FROM log_table")
 
-            file = open(name,'w',newline="")
             writer = csv.writer(file,delimiter=';')
-            first_item = next(data)  # get first item to get keys
-            writer.writerow(first_item.keys())  # keys=title you're looking for
-            writer.writerow(first_item)
+            writer.writerow(titles)  # keys=title you're looking for
             # write the rest
             writer.writerows(data)
 
@@ -296,7 +317,7 @@ def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     app = QtGui.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('icon.png'))
 
-    db_conn = sqlite3.connect(db_filepath,timeout=10)
+    db_conn = sqlite3.connect(db_filepath,timeout=20)
     db_cursor = db_conn.cursor()
 
     main_window = gcs_main_window(usb_pipe, log_pipe, db_conn, db_cursor,db_filepath)
