@@ -1,0 +1,5 @@
+- Logs tab to search through database for events and/or logged packets (similar to raw terminal)
+- Refresh button for historic view
+- The other graphs
+
+- Test everything!

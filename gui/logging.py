@@ -6,7 +6,7 @@ from .packets import *
 script_dir = os.path.dirname(__file__)
 
 def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath):
-    db = sqlite3.connect(db_filepath)
+    db = sqlite3.connect(db_filepath, timeout=10)
     cursor = db.cursor()
     while not gui_exit.is_set():
         # Main loop, add incoming packets to database
@@ -14,14 +14,14 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath):
             new_pkt = usb_pipe.recv()
             try:
                 with db:
-                    if id in Log_PCKT_LIST:
-                        db.execute('''INSERT INTO log_table(timestamp, id,
-                                payload_16)
+                    if new_pkt.id in LOG_PCKT_LIST:
+                        cursor.execute('''INSERT INTO log_table(timestamp, id, payload_16)\
                                 VALUES(?,?,?)''',
                                 (new_pkt.timestamp, new_pkt.id,new_pkt.payload))
                         db.commit()
+
                     elif id in EVENT_PCKT_LIST:
-                        db.execute('''INSERT INTO log_table(timestamp, id)
+                        cursor.execute('''INSERT INTO log_table(timestamp, id)\
                                 VALUES(?,?)''',
                                 (new_pkt.timestamp, new_pkt.id))
                         db.commit()

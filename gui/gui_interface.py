@@ -37,7 +37,7 @@ class TimeAxisItem(pg.AxisItem):
         super().__init__(*args, **kwargs)
 
     def tickStrings(self, values, scale, spacing):
-        return [int2dt(value).strftime("%H:%M:%S\n%-j/%-m/%Y") for value in values]
+        return [int2dt(value).strftime("%H:%M:%S\n%-d/%-m/%Y") for value in values]
 
 class MainThd(QThread):
     def __init__(self, window_pipe, usb_pipe, log_pipe):
@@ -134,12 +134,12 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.update_thread.start(QThread.LowPriority)
 
     def dump_sd(self):
-        self.DUMP_IN_PROGRESS(True)
+        self.dump_in_progress(True)
         cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Request_dump")]
         cmd = Cmd_Packet(cmd_id)
         self.gui_end.send(cmd)
 
-    def DUMP_IN_PROGRESS(self,arg=None):
+    def dump_in_progress(self,arg=None):
         if arg:
             self.DUMP_IN_PROGRESS = arg
         return self.DUMP_IN_PROGRESS
@@ -163,16 +163,15 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
     def new_packet(self, packet):
         # Print to terminal tab
-        packet.printout(self.textBrowser_terminal)
-
+        packet.printout(self.textBrowserTerminal)
         if packet.id in EVENT_PCKT_LIST:
             new_name = EVENT_PCKT_LIST.get(packet.id)[0]
             if new_name == "SD_Dump_End":
                 # SD Dump has ended
-                self.DUMP_IN_PROGRESS(False)
-                return
+                self.dump_in_progress(False)
+                return None
 
-        if self.radioButtonLiveData.isChecked() and not self.DUMP_IN_PROGRESS():
+        elif self.radioButtonLiveData.isChecked(): # and not self.dump_in_progress():
             # Display live data
             go_back = self.spinBoxGoingBack.value()*60  # Go back this many seconds on live graph
             new_name = LOG_PCKT_LIST.get(packet.id)[0]
@@ -206,20 +205,24 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
     def update_temp(self,start,end):
         # Fetch temperatures and plot them
-        self.db_cursor.execute(
-            'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i})'.\
-            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")]))
+        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i}'.\
+            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")])
+        self.db_cursor.execute(cmd)
         temperatures = self.db_cursor.fetchall()
-        temperatures = np.asarray(temperatures)
+        if temperatures:
+            # If not empty
+            temperatures = np.asarray(temperatures)
+            temperatures = temperatures.astype(float)
+            temperatures[:,1] = ((temperatures[:,1]*V_SUPPLY)/(1024.0*TEMP_GAIN))*100.0 - 50.0
 
-        self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
-        self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
+            self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
+            self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
     def historic_plot(self):
         if not self.radioButtonLiveData.isChecked():
             # Plot data in historic mode
-            start = int(round(self.dateTimeEditHistoricFrom.dateTime.toMSecsSinceEpoch()/1000))
-            end = int(round(self.dateTimeEditHistoricTo.dateTime.toMSecsSinceEpoch()/1000))
+            start = int(round(self.dateTimeEditHistoricFrom.dateTime().toTime_t()))
+            end = int(round(self.dateTimeEditHistoricTo.dateTime().toTime_t()))
             self.update_temp(start,end)
             #self.update_light(start,end)
             #etc.
@@ -231,7 +234,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     def terminal_save(self):
         name = QtGui.QFileDialog.getSaveFileName(self,'Save File')
         file = open(name,'w')
-        file.write(self.textBrowser_terminal.toPlainText())
+        file.write(self.textBrowserTerminal.toPlainText())
         file.close()
 
     def wipe_sd(self):
@@ -293,7 +296,7 @@ def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     app = QtGui.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('icon.png'))
 
-    db_conn = sqlite3.connect(db_filepath)
+    db_conn = sqlite3.connect(db_filepath,timeout=10)
     db_cursor = db_conn.cursor()
 
     main_window = gcs_main_window(usb_pipe, log_pipe, db_conn, db_cursor,db_filepath)

@@ -45,7 +45,7 @@ def run():
         os.makedirs(os.path.abspath(os.path.join(script_dir,log_dir)), exist_ok=True)
         db_filepath = os.path.abspath(os.path.join(script_dir,log_dir,"datalogger_db"))
 
-        db = sqlite3.connect(db_filepath)
+        db = sqlite3.connect(db_filepath,timeout=10)
         cursor = db.cursor()
         cursor.executescript("""
             DROP TABLE IF EXISTS log_table;

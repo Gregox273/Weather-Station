@@ -44,6 +44,7 @@ def run(gui_pipe, log_pipe, gui_exit):
                 if cmd.conn and not ser.is_open:
                     # Connect
                     ser.open()
+                    print("open")
                 elif not cmd.conn and ser.is_open:
                     # Disconnect
                     ser.close()
@@ -75,12 +76,14 @@ def run(gui_pipe, log_pipe, gui_exit):
                             message = Log_Packet.construct(serial_buffer[0:length])
                             #gui_pipe.send(message)
                             log_pipe.send(message)
+                            serial_buffer = bytearray()  # Clear buffer
                     elif id in EVENT_PCKT_LIST:
                         length = EVENT_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
                             message = Event_Packet.construct(serial_buffer[0:length])
                             #gui_pipe.send(message)
                             log_pipe.send(message)
+                            serial_buffer = bytearray()  # Clear buffer
                     else:
                         # Unrecognised packet, empty buffer
                         serial_buffer = bytearray()
