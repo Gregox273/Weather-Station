@@ -38,7 +38,7 @@ state_t run_state(state_t cur_state){
 };
 
 /* Global Variables */
-uint32_t idle_time = 30;
+uint32_t idle_time = 1;
 bool tx_flag = false;
 
 
@@ -165,6 +165,9 @@ void go_to_sleep(uint32_t sleep_time){
     uint32_t num_secs = 0;
 
     while(num_secs<sleep_time){
+
+        /* Check Serial Port for Commands */
+        check_commands();
     
         LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
         num_secs += 1;
