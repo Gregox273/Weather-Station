@@ -48,6 +48,7 @@ def run():
         db = sqlite3.connect(db_filepath,timeout=20)
         cursor = db.cursor()
         cursor.execute('PRAGMA journal_mode=wal')
+        cursor.execute('PRAGMA Pooling=True')
         cursor.executescript("""
             DROP TABLE IF EXISTS log_table;
             CREATE TABLE log_table(

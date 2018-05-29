@@ -65,7 +65,7 @@ class MainThd(QThread):
 
 class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     """Inherit main window generated in QT4 Designer"""
-    def __init__(self, usb_pipe, log_pipe, conn, cursor, db_filepath, parent=None):
+    def __init__(self, usb_pipe, log_pipe, db_filepath, parent=None):
 
         # Graphs - enable antialiasing
         pg.setConfigOptions(antialias=True,  # Enable antialiasing
@@ -123,9 +123,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.actionConnect.triggered.connect(self.toggle_con)
 
         # Add db
-        self.db_conn = conn
-        self.db_cursor = cursor
-        self.db_filepath = db_filepath  # For creating new temporary connections
+        self.db_filepath = db_filepath
 
         # SD dump flag
         self.DUMP_IN_PROGRESS = False
@@ -178,14 +176,6 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             if new_name == "Temperature":
                 # Fetch temperatures
                 self.update_temp(int(round(time.time())) - go_back, 2147483647)
-                # self.db_cursor.execute(
-                #     'SELECT timestamp, payload_16 from log_table WHERE timestamp >= {t} AND id == {i})'.\
-                #     format(t = ) - go_back, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")]))
-                # temperatures = self.db_cursor.fetchall()
-                # temperatures = np.asarray(temperatures)
-                #
-                # self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
-                # self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
             elif new_name == "Windspeed":
                 # Fetch wind speed
@@ -202,12 +192,19 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
                 self.update_UV(int(round(time.time())) - go_back, 2147483647)
                 pass
 
+    def run_db(self,cmd):
+        conn = sqlite3.connect(self.db_filepath,timeout=20)
+        c = conn.cursor()
+        c.execute(cmd)
+        val = c.fetchall()
+        conn.close()
+        return val
+
     def update_temp(self,start,end):
         # Fetch temperatures and plot them
         cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
             format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")])
-        self.db_cursor.execute(cmd)
-        temperatures = self.db_cursor.fetchall()
+        temperatures = self.run_db(cmd)
         if temperatures:
             # If not empty
             temperatures = np.asarray(temperatures)
@@ -221,8 +218,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # Fetch UV measurements and plot them
         cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
             format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("UV")])
-        self.db_cursor.execute(cmd)
-        uv_readings = self.db_cursor.fetchall()
+        uv_readings = self.run_db(cmd)
         if uv_readings:
             # If not empty
             uv_readings = np.asarray(uv_readings)
@@ -267,9 +263,12 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             pass
 
     def export_db(self):
+        conn = sqlite3.connect(self.db_filepath,timeout=20)
+        c = conn.cursor()
+
         # First check whether database is empty
-        self.db_cursor.execute("SELECT exists(SELECT 1 from log_table);")
-        n = self.db_cursor.fetchall()
+        c.execute("SELECT exists(SELECT 1 from log_table);")
+        n = c.fetchall()
         if n[0][0] == 0:
             # Empty table
             msg = QtGui.QMessageBox()
@@ -286,12 +285,12 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             if not name.lower().endswith('.csv'):
                 name = name + '.csv'
             file = open(name,'w',newline="")
-            self.db_conn.row_factory = sqlite3.Row
-            crsr=self.db_conn.execute("SELECT * From log_table")
+            conn.row_factory = sqlite3.Row
+            crsr=conn.execute("SELECT * From log_table")
             row=crsr.fetchone()
             titles=row.keys()
 
-            data = self.db_cursor.execute("SELECT * FROM log_table")
+            data = c.execute("SELECT * FROM log_table")
 
             writer = csv.writer(file,delimiter=';')
             writer.writerow(titles)  # keys=title you're looking for
@@ -299,6 +298,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             writer.writerows(data)
 
             file.close()
+            conn.close()
 
     def toggle_con(self):
         if self.actionConnect.isChecked():
@@ -313,17 +313,14 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         cmd = Cmd_Packet(cmd_id)
         self.gui_end.send(cmd)
 
+
 def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     app = QtGui.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('icon.png'))
 
-    db_conn = sqlite3.connect(db_filepath,timeout=20)
-    db_cursor = db_conn.cursor()
 
-    main_window = gcs_main_window(usb_pipe, log_pipe, db_conn, db_cursor,db_filepath)
+    main_window = gcs_main_window(usb_pipe, log_pipe,db_filepath)
     main_window.show()
 
     app.exec_()
-
-    db_conn.close()
     gui_exit.set()

@@ -24,7 +24,7 @@ def run(gui_pipe, log_pipe, gui_exit):
                     action="store_true")
 
     args = parser.parse_args()
-    ser = serial.Serial(port = args.port, baudrate = args.baud, write_timeout = 3, timeout = 800/args.baud)  # Open serial port
+    ser = serial.Serial(port = args.port, baudrate = args.baud, write_timeout = 0, timeout = 800/args.baud)  # Open serial port
     # timeout is time taken to send 100 bytes at baudrate
     time.sleep(3)  # Give arduino time to reset
     if args.debug:
