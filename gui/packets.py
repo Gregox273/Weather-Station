@@ -5,9 +5,22 @@ import struct
 from PyQt4 import QtCore,QtGui
 import json
 import datetime
-#from enum import Enum
 
 # Important Constants:
+
+# Nominal Supply Voltage
+V_SUPPLY = 5.0
+
+# Amplifier Gains
+TEMP_GAIN = 5.0164
+UV_GAIN = 5.0142
+V_LOW_LIGHT_GAIN = 33.9525
+
+# Resistor Values
+LIGHT_RES = 995.823
+LOW_LIGHT_RES = 32876.6
+
+
 LOG_PCKT_LEN = 7    # Number of bytes in a standard ADC reading packet
 EVENT_PCKT_LEN = 5  # Number of bytes in a log packet
 
@@ -33,7 +46,7 @@ EVENT_PCKT_LIST = { 0x80: ["RTC_Error", EVENT_PCKT_LEN],        # Communication 
                     0x85: ["Tx_Enable", EVENT_PCKT_LEN],        # Live transmission of data enabled
                     0x86: ["Tx_Disable", EVENT_PCKT_LEN],       # Live transmission of data disabled
                     0x87: ["SD_Dump", EVENT_PCKT_LEN],          # SD card dumped to host computer
-                    0x88: ["SD_Dump_End", EVENT_PCKT_LEN]       # End of SD card dump
+                    0x88: ["SD_Wipe", EVENT_PCKT_LEN]           # SD card wiped
 }  # List of event packets {id: ["Name", length in bytes]}
 event_pckt_names = [i[0] for i in list(EVENT_PCKT_LIST.values())]
 
@@ -91,6 +104,7 @@ class Log_Packet(object):
          textbox.insertPlainText("Log Packet: ({})\n".format(name))
          textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
          textbox.insertPlainText("Payload: {}\n".format(self.payload))
+         textbox.moveCursor(QtGui.QTextCursor.End)
 
 # class Event(object):
 #     """Event packet"""
@@ -108,7 +122,7 @@ class Log_Packet(object):
 #         packed_bytes = struct.pack('<BI', id, timestamp)
 #         return cls(packed_bytes)
 
-class Event(object):
+class Event_Packet(object):
     """Event packet"""
     def __init__(self, id, timestamp, packed=None):
         if packed:
@@ -131,9 +145,9 @@ class Event(object):
          textbox.moveCursor(QtGui.QTextCursor.End)
          textbox.ensureCursorVisible()
          name = EVENT_PCKT_LIST.get(self.id)[0]
-         textbox.insertPlainText("Log Packet: ({})\n".format(name))
-         textbox.insertPlainText("Event: ({})\n".format(self.id.name))
+         textbox.insertPlainText("Event: ({})\n".format(name))
          textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
+         textbox.moveCursor(QtGui.QTextCursor.End)
 
 class Cmd_Packet(object):
     """Base PC to datalogger command packet"""

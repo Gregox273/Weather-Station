@@ -1,0 +1,10 @@
+- Split terminal tab into logs, events and both (tabs within the tab)
+- Plot uv power as well as index
+- Refresh button for historic view
+- The other graphs
+- Stop live transmit on gui exit
+- y axis labels
+- Arduino does not reliably respond to commands?
+- Click and drag area to zoom in on graphs
+
+- Test everything!

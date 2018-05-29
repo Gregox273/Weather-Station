@@ -24,7 +24,7 @@ def run(gui_pipe, log_pipe, gui_exit):
                     action="store_true")
 
     args = parser.parse_args()
-    ser = serial.Serial(port = args.port, baudrate = args.baud, write_timeout = 3, timeout = 800/args.baud)  # Open serial port
+    ser = serial.Serial(port = args.port, baudrate = args.baud, write_timeout = 0, timeout = 800/args.baud)  # Open serial port
     # timeout is time taken to send 100 bytes at baudrate
     time.sleep(3)  # Give arduino time to reset
     if args.debug:
@@ -44,6 +44,7 @@ def run(gui_pipe, log_pipe, gui_exit):
                 if cmd.conn and not ser.is_open:
                     # Connect
                     ser.open()
+                    print("open")
                 elif not cmd.conn and ser.is_open:
                     # Disconnect
                     ser.close()
@@ -75,12 +76,14 @@ def run(gui_pipe, log_pipe, gui_exit):
                             message = Log_Packet.construct(serial_buffer[0:length])
                             #gui_pipe.send(message)
                             log_pipe.send(message)
+                            serial_buffer = bytearray()  # Clear buffer
                     elif id in EVENT_PCKT_LIST:
                         length = EVENT_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
                             message = Event_Packet.construct(serial_buffer[0:length])
                             #gui_pipe.send(message)
                             log_pipe.send(message)
+                            serial_buffer = bytearray()  # Clear buffer
                     else:
                         # Unrecognised packet, empty buffer
                         serial_buffer = bytearray()

@@ -150,6 +150,18 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="labelHistoricTo_2">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>(system times)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="Line" name="line_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -296,7 +308,7 @@
       </widget>
       <widget class="QWidget" name="tabTemperature">
        <attribute name="title">
-        <string>Temperature</string>
+        <string>Temp</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -374,6 +386,68 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabLogs">
+       <attribute name="title">
+        <string>Logs</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QTextBrowser" name="textBrowserTerminal_2">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="openLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="widget" native="true">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>80</height>
+           </size>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QRadioButton" name="radioButtonLogs">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Logs</string>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButtonEvents">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Events</string>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabTerminal">
        <attribute name="title">
         <string>Terminal</string>
@@ -407,13 +481,6 @@
      <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuSerial">
-    <property name="title">
-     <string>Serial</string>
-    </property>
-    <addaction name="actionConnect"/>
-    <addaction name="separator"/>
-   </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
@@ -424,7 +491,6 @@
     <addaction name="actionExport_Database"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuSerial"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionConnect">
