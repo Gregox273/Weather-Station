@@ -1,3 +1,4 @@
+
 - Split terminal tab into logs, events and both (tabs within the tab)
 - Plot uv power as well as index
 - Refresh button for historic view

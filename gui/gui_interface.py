@@ -3,6 +3,7 @@ Gregory Brooks(gb510), Matt Coates(mc955) 2018
 Includes gist (https://gist.github.com/friendzis/4e98ebe2cf29c0c2c232)
 by friendzis & scls19fr
 and code by Jean-François Fabre & ömer sarı (https://stackoverflow.com/questions/39308042/sqlite3-database-tables-export-in-csv)
+# Code for second axis on UV graphs by lambcutlet (https://stackoverflow.com/questions/48590354/pyqtgraph-plotwidget-multiple-y-axis-plots-in-wrong-area)
 """
 from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL, QTimer
@@ -89,6 +90,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.plot_uv_O = self.graphicsLayoutWidgetUV_O.addPlot(
             title='UV Index',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_uv_O.setLabel('left', 'UV Index')
 
         # Individual tabs
         self.plot_temp = self.graphicsLayoutWidgetTemp.addPlot(
@@ -103,6 +105,26 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.plot_uv = self.graphicsLayoutWidgetUV.addPlot(
             title='UV Index',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_uv.setLabel('left', 'UV Index')
+
+        # Second y axis for UV Graphs
+        self.p2_uv_O = pg.ViewBox()
+        self.p2_uv = pg.ViewBox()
+        self.plot_uv_O.showAxis('right')
+        self.plot_uv.showAxis('right')
+        self.plot_uv_O.scene().addItem(self.p2_uv_O)
+        self.plot_uv.scene().addItem(self.p2_uv)
+        self.plot_uv_O.getAxis('right').linkToView(self.p2_uv_O)
+        self.plot_uv.getAxis('right').linkToView(self.p2_uv)
+        self.p2_uv_O.setXLink(self.plot_uv_O)
+        self.p2_uv.setXLink(self.plot_uv)
+
+        self.plot_uv_O.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv_O,self.p2_uv_O))
+        self.plot_uv.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv, self.p2_uv))
+
+        # Power axis for UV graphs
+        self.plot_uv_O.setLabel('right', 'UV Power', units="W/m^2")
+        self.plot_uv.setLabel('right', 'UV Power', units="W/m^2")
 
         # Update thread, don't start yet
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
@@ -130,6 +152,10 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
+
+    def updateViewsUV(self, graph, p2):
+        p2.setGeometry(graph.vb.sceneBoundingRect())
+        #self.p2_uv.setGeometry(self.plot_uv_O.vb.sceneBoundingRect())
 
     def dump_sd(self):
         self.dump_in_progress(True)
@@ -227,10 +253,17 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
             uv_index = uv_vout/(4.3*0.026)
             uv_power = uv_vout/(4.3*0.113)
-            uv = np.column_stack((uv_readings[:,0], uv_index))# uv_power))
+            uv_index = np.column_stack((uv_readings[:,0], uv_index))
+            #uv_power = np.column_stack((uv_readings[:,0], uv_power))
+            uv_power = np.asarray(uv_power)
 
-            self.plot_uv_O.plot(uv, clear = True,pen=(0,0,255))
-            self.plot_uv.plot(uv, clear = True,pen=(0,0,255))
+            self.plot_uv_O.plot(uv_index, clear = True,pen=(0,0,255))
+            #self.plot_uv_O.plot(uv_power, pen=(255,0,255))
+            self.plot_uv.plot(uv_index, clear = True,pen=(0,0,255))
+            #self.plot_uv.plot(uv_power, pen=(255,0,255))
+
+            self.p2_uv_O.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
+            self.p2_uv.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
 
     def historic_plot(self):
         if not self.radioButtonLiveData.isChecked():
