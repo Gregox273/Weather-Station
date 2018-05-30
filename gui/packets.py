@@ -103,7 +103,7 @@ class Log_Packet(object):
          name = LOG_PCKT_LIST.get(self.id)[0]
          textbox.insertPlainText("Log Packet: ({})\n".format(name))
          textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
-         textbox.insertPlainText("Payload: {}\n".format(self.payload))
+         textbox.insertPlainText("Payload: {}\n\n".format(self.payload))
          textbox.moveCursor(QtGui.QTextCursor.End)
 
 # class Event(object):
@@ -146,7 +146,7 @@ class Event_Packet(object):
          textbox.ensureCursorVisible()
          name = EVENT_PCKT_LIST.get(self.id)[0]
          textbox.insertPlainText("Event: ({})\n".format(name))
-         textbox.insertPlainText("Timestamp: {} ({}s)\n".format(self.time_date,self.timestamp))
+         textbox.insertPlainText("Timestamp: {} ({}s)\n\n".format(self.time_date,self.timestamp))
          textbox.moveCursor(QtGui.QTextCursor.End)
 
 class Cmd_Packet(object):

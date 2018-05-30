@@ -144,6 +144,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.actionExport_Database.triggered.connect(self.export_db)
         self.actionConnect.triggered.connect(self.toggle_con)
 
+        #self.tabWidgetSubTerminal.currentChanged.connect(self.update_terminal_tab)
+
         # Add db
         self.db_filepath = db_filepath
 
@@ -152,6 +154,23 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
+
+    # def update_terminal_tab(self):
+    #     if self.tabWidgetSubTerminal.currentIndex() == 1:
+    #         # Log packet tab
+    #             cmd = 'SELECT id, timestamp, payload_16 from log_table WHERE id IN ({log_ids}) ORDER BY timestamp ASC'.format(log_ids=",".join(["?"]*len(LOG_PCKT_LIST.keys())))
+    #             from_db = self.run_db(cmd, list(LOG_PCKT_LIST.keys()))
+    #             for i in from_db:
+    #                 pckt = Log_Packet(i[0],i[1],i[2])
+    #                 pckt.printout(self.textBrowserTerminalLogs)
+    #
+    #     elif self.tabWidgetSubTerminal.currentIndex() == 2:
+    #         # Event packet tab
+    #         cmd = 'SELECT id, timestamp, payload_16 from log_table WHERE id IN ({ev_ids}) ORDER BY timestamp ASC'.format(ev_ids=",".join(["?"]*len(EVENT_PCKT_LIST.keys())))
+    #         from_db = self.run_db(cmd, list(EVENT_PCKT_LIST.keys()))
+    #         for i in from_db:
+    #             pckt = Event_Packet(i[0],i[1],i[2])
+    #             pckt.printout(self.textBrowserTerminalEvents)
 
     def updateViewsUV(self, graph, p2):
         p2.setGeometry(graph.vb.sceneBoundingRect())
@@ -188,7 +207,13 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     def new_packet(self, packet):
         # Print to terminal tab
         packet.printout(self.textBrowserTerminal)
+        if packet.id in LOG_PCKT_LIST:
+            packet.printout(self.textBrowserTerminalLogs)
+        #self.update_terminal_tab()
+
+
         if packet.id in EVENT_PCKT_LIST:
+            packet.printout(self.textBrowserTerminalEvents)
             new_name = EVENT_PCKT_LIST.get(packet.id)[0]
             if new_name == "SD_Dump_End":
                 # SD Dump has ended
@@ -218,10 +243,13 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
                 self.update_UV(int(round(time.time())) - go_back, 2147483647)
                 pass
 
-    def run_db(self,cmd):
+    def run_db(self,cmd,args=None):
         conn = sqlite3.connect(self.db_filepath,timeout=20)
         c = conn.cursor()
-        c.execute(cmd)
+        if args:
+            c.execute(cmd,args)
+        else:
+            c.execute(cmd)
         val = c.fetchall()
         conn.close()
         return val
@@ -290,7 +318,6 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
                                             "Are you sure?",
                                             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
         if choice == QtGui.QMessageBox.Yes:
-            print("Wiping SD Card")
             self.send_cmd("SD_Wipe")
         else:
             pass
