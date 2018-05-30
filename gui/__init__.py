@@ -47,6 +47,7 @@ def run():
 
         db = sqlite3.connect(db_filepath,timeout=20)
         cursor = db.cursor()
+        cursor.execute('PRAGMA synchronous=OFF')  # Speed up writing, database may be corrupted if computer powers off
         cursor.execute('PRAGMA journal_mode=wal')
         cursor.execute('PRAGMA Pooling=True')
         cursor.executescript("""
@@ -78,12 +79,21 @@ def run():
     usb_process = multiprocessing.Process(target=usb.run, args=(usb_gui_pipe, usb_log_pipe, gui_exit))
     usb_process.start()
 
+    usb_process.join()
+    print("Exiting...")
+    print("USB process ended")
+    print("Finishing up logging...      ", end="")
+
+    log_process.join()
+    print("[DONE!]")
+    print("Logging process ended")
 
     gui_process.join()
-    print("Exiting...")
     print("GUI process ended")
-    usb_process.join()
-    print("USB process ended")
-    log_process.join()
-    print("Logging process ended")
+
+    # if usb_process.is_alive():
+    #     usb_process.terminate()
+    #     usb_process.join()
+
+
     time.sleep(0.2)

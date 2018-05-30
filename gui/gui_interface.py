@@ -384,3 +384,6 @@ def run(usb_pipe, log_pipe, gui_exit,db_filepath):
 
     app.exec_()
     gui_exit.set()
+    
+    # Might need to keep log->gui pipe empty here if it causes problems
+    #(cf. loggign process keeping usb pipe clear)

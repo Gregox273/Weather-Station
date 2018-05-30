@@ -52,7 +52,6 @@ def run(gui_pipe, log_pipe, gui_exit):
                 # Send to the arduino
                 if ser.is_open:
                     ser.write(cmd.to_binary())
-
         if ser.is_open:
             byte_in = ser.read()
             if not byte_in:
@@ -75,19 +74,23 @@ def run(gui_pipe, log_pipe, gui_exit):
                         if len(serial_buffer) >= length:
                             message = Log_Packet.construct(serial_buffer[0:length])
                             #gui_pipe.send(message)
-                            log_pipe.send(message)
+                            if gui_exit.is_set():
+                                break  # End process
+                            else:
+                                log_pipe.send(message)
                             serial_buffer = bytearray()  # Clear buffer
                     elif id in EVENT_PCKT_LIST:
                         length = EVENT_PCKT_LIST.get(id)[1]
                         if len(serial_buffer) >= length:
                             message = Event_Packet.construct(serial_buffer[0:length])
                             #gui_pipe.send(message)
-                            log_pipe.send(message)
+                            if gui_exit.is_set():
+                                break  # End process
+                            else:
+                                log_pipe.send(message)
                             serial_buffer = bytearray()  # Clear buffer
                     else:
                         # Unrecognised packet, empty buffer
                         serial_buffer = bytearray()
-
-
         else:
             time.sleep(0.2)

@@ -1,4 +1,3 @@
-- Fix bug: usb process does not terminate if closed during sd dump?
 - Refresh button for historic view
 - The other graphs
 - Stop live transmit on gui exit
