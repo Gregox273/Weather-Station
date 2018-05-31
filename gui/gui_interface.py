@@ -85,32 +85,51 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.plot_temp_O = self.graphicsLayoutWidgetTemp_O.addPlot(
             title='Temperature',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_temp_O.setLabel('left', 'Temperature', units='°C')
+        self.plot_temp_O.setLabel('bottom', 'Timestamp')
+
         self.plot_wind_O = self.graphicsLayoutWidgetWind_O.addPlot(
             title='Wind Speed',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_wind_O.setLabel('left', 'Wind Speed', units='m/s')
+        self.plot_wind_O.setLabel('bottom', 'Timestamp')
+
         self.plot_light_O = self.graphicsLayoutWidgetLight_O.addPlot(
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_light_O.setLabel('left', 'Light Intensity', units='lx')
+        self.plot_light_O.setLabel('bottom', 'Timestamp')
+
         self.plot_uv_O = self.graphicsLayoutWidgetUV_O.addPlot(
             title='UV Index',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_uv_O.setLabel('left', 'UV Index')
+        self.plot_uv_O.setLabel('bottom', 'Timestamp')
 
         # Individual tabs
         self.plot_temp = self.graphicsLayoutWidgetTemp.addPlot(
             title='Temperature',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_temp.setLabel('left', 'Temperature', units='°C')
+        self.plot_temp.setLabel('bottom', 'Timestamp')
+
         self.plot_wind = self.graphicsLayoutWidgetWind.addPlot(
             title='Wind Speed',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_wind.setLabel('left', 'Wind Speed', units='m/s')
+        self.plot_wind.setLabel('bottom', 'Timestamp')
+
         self.plot_light = self.graphicsLayoutWidgetLight.addPlot(
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_light.setLabel('left', 'Light Intensity', units='lx')
+        self.plot_light.setLabel('bottom', 'Timestamp')
+
         self.plot_uv = self.graphicsLayoutWidgetUV.addPlot(
             title='UV Index',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_uv.setLabel('left', 'UV Index')
+        self.plot_uv.setLabel('bottom', 'Timestamp')
 
         # Second y axis for UV Graphs
         self.p2_uv_O = pg.ViewBox()
@@ -132,8 +151,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.plot_uv.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv, self.p2_uv))
 
         # Power axis for UV graphs
-        self.plot_uv_O.setLabel('right', 'UV Power', units="W/cm^2")
-        self.plot_uv.setLabel('right', 'UV Power', units="W/cm^2")
+        self.plot_uv_O.setLabel('right', 'UV Power', units="W/m^2")
+        self.plot_uv.setLabel('right', 'UV Power', units="W/m^2")
 
         # Update thread, don't start yet
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
@@ -290,7 +309,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
             uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
             uv_index = uv_vout/(4.3*0.026)
-            uv_power = uv_vout/(4.3*113)
+            uv_power = uv_vout*10000.0/(4.3*113)
             uv_index = np.column_stack((uv_readings[:,0], uv_index))
             #uv_power = np.column_stack((uv_readings[:,0], uv_power))
             uv_power = np.asarray(uv_power)
