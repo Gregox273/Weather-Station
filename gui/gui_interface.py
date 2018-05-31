@@ -143,6 +143,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # Add slots and signals manually:
         self.pushButtonDumpSD.clicked.connect(self.dump_sd)
         self.radioButtonLiveData.clicked.connect(lambda: self.toggle_live_data(self.radioButtonLiveData.isChecked()))
+        self.pushButtonRefreshHistoric.clicked.connect(self.historic_plot)
         self.dateTimeEditHistoricFrom.dateTimeChanged.connect(self.historic_plot)
         self.dateTimeEditHistoricTo.dateTimeChanged.connect(self.historic_plot)
         self.pushButtonUpdateRTC.clicked.connect(self.update_rtc)
@@ -341,8 +342,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             end = int(round(self.dateTimeEditHistoricTo.dateTime().toTime_t()))
             self.update_temp(start,end)
             self.update_UV(start,end)
-            #self.update_light(start,end)
-            #etc.
+            self.update_light(start,end)
+            self.update_wind(start,end)
 
     def set_text(self,text,lineedit):
         lineedit.setText(str(text))

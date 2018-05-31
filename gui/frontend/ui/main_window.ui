@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>738</width>
-    <height>469</height>
+    <height>485</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,13 +20,13 @@
       <property name="minimumSize">
        <size>
         <width>140</width>
-        <height>400</height>
+        <height>420</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>400</height>
+        <height>420</height>
        </size>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -108,6 +108,19 @@
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>Historic Data:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonRefreshHistoric">
+         <property name="minimumSize">
+          <size>
+           <width>70</width>
+           <height>26</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Refresh</string>
          </property>
         </widget>
        </item>
