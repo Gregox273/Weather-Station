@@ -4,5 +4,6 @@
 - y axis labels
 - Arduino does not reliably respond to commands?
 - Click and drag area to zoom in on graphs
+- Display supply voltage
 
 - Test everything!

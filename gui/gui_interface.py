@@ -23,6 +23,10 @@ import numpy as np
 import csv
 
 script_dir = os.path.dirname(__file__)
+x_wind = np.array([7,14,4,13,18,6,5,18,5,4,11,4,3,2])
+y_wind = np.array([4,5.7,2.8,6.6,12.9,5.9,3.5,12,1.3,2.1,4.7,2.3,1.6,2])
+z_wind = np.polyfit(x_wind, y_wind, 3)
+f_wind = np.poly1d(z_wind)
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -96,6 +100,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.plot_temp = self.graphicsLayoutWidgetTemp.addPlot(
             title='Temperature',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+        self.plot_temp.setLabel('left', 'Temperature', units='°C')
         self.plot_wind = self.graphicsLayoutWidgetWind.addPlot(
             title='Wind Speed',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
@@ -230,16 +235,16 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             new_name = LOG_PCKT_LIST.get(packet.id)[0]
             if new_name == "Temperature":
                 # Fetch temperatures
-                self.update_temp(int(round(time.time())) - go_back, 2147483647)
+                self.update_temp(int(round(time.time())) - go_back, 2147483647)  # Until unix time overflow
 
             elif new_name == "Windspeed":
                 # Fetch wind speed
-                #self.update_wind(int(round(time.time())) - go_back, 2147483647)
+                self.update_wind(int(round(time.time())) - go_back, 2147483647)
                 pass
 
             elif new_name in ("Light, Low_Light, V_Low_Light"):
                 # Fetch Light
-                #self.update_light(int(round(time.time())) - go_back, 2147483647)
+                self.update_light(int(round(time.time())) - go_back, 2147483647)
                 pass
 
             elif new_name == "UV":
@@ -298,6 +303,36 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             # self.p2_uv.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
             self.p2_plot_O.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
             self.p2_plot.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
+
+    def update_light(self,start,end):
+        # Fetch light levels and plot them
+        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
+            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Light")])
+        light = self.run_db(cmd)
+        if light:
+            # If not empty
+            light = np.asarray(light)
+            light = light.astype(float)
+            #light[:,1] = ((light[:,1]*V_SUPPLY)/(1024.0*TEMP_GAIN))*100.0 - 50.0
+
+            self.plot_light_O.plot(light, clear = True,pen=(100,100,0))
+            self.plot_light.plot(light, clear = True,pen=(100,100,0))
+
+    def update_wind(self,start,end):
+        # Fetch light levels and plot them
+        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
+            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Windspeed")])
+        wind = self.run_db(cmd)
+        if wind:
+            # If not empty
+            wind = np.asarray(wind)
+            wind = wind.astype(float)
+            wind[:,1] = f_wind(wind[:,1])  # m/s
+            # Set negative values to 0
+            wind[:,1] = np.where(wind[:,1] < 0, 0, wind[:,1])
+
+            self.plot_wind_O.plot(wind, clear = True,pen=(0,0,0))
+            self.plot_wind.plot(wind, clear = True,pen=(0,0,0))
 
     def historic_plot(self):
         if not self.radioButtonLiveData.isChecked():
