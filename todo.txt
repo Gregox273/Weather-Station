@@ -1,4 +1,4 @@
-- Refresh button for historic view
+-  Refresh button for historic view
 - The other graphs
 - Stop live transmit on gui exit
 - y axis labels

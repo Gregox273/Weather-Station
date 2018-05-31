@@ -46,7 +46,8 @@ EVENT_PCKT_LIST = { 0x80: ["RTC_Error", EVENT_PCKT_LEN],        # Communication 
                     0x85: ["Tx_Enable", EVENT_PCKT_LEN],        # Live transmission of data enabled
                     0x86: ["Tx_Disable", EVENT_PCKT_LEN],       # Live transmission of data disabled
                     0x87: ["SD_Dump", EVENT_PCKT_LEN],          # SD card dumped to host computer
-                    0x88: ["SD_Wipe", EVENT_PCKT_LEN]           # SD card wiped
+                    0x88: ["SD_Wipe", EVENT_PCKT_LEN],          # SD card wiped
+                    0x90: ["SD_Dump_End", EVENT_PCKT_LEN]       # End of SD dump (TIMESTAMP INVALID!)
 }  # List of event packets {id: ["Name", length in bytes]}
 event_pckt_names = [i[0] for i in list(EVENT_PCKT_LIST.values())]
 

@@ -110,6 +110,10 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # Second y axis for UV Graphs
         self.p2_uv_O = pg.ViewBox()
         self.p2_uv = pg.ViewBox()
+        self.p2_plot_O = pg.PlotCurveItem()
+        self.p2_plot = pg.PlotCurveItem()
+        self.p2_uv_O.addItem(self.p2_plot_O)
+        self.p2_uv.addItem(self.p2_plot)
         self.plot_uv_O.showAxis('right')
         self.plot_uv.showAxis('right')
         self.plot_uv_O.scene().addItem(self.p2_uv_O)
@@ -123,8 +127,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.plot_uv.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv, self.p2_uv))
 
         # Power axis for UV graphs
-        self.plot_uv_O.setLabel('right', 'UV Power', units="W/m^2")
-        self.plot_uv.setLabel('right', 'UV Power', units="W/m^2")
+        self.plot_uv_O.setLabel('right', 'UV Power', units="W/cm^2")
+        self.plot_uv.setLabel('right', 'UV Power', units="W/cm^2")
 
         # Update thread, don't start yet
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
@@ -280,7 +284,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
             uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
             uv_index = uv_vout/(4.3*0.026)
-            uv_power = uv_vout/(4.3*0.113)
+            uv_power = uv_vout/(4.3*113)
             uv_index = np.column_stack((uv_readings[:,0], uv_index))
             #uv_power = np.column_stack((uv_readings[:,0], uv_power))
             uv_power = np.asarray(uv_power)
@@ -290,8 +294,10 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             self.plot_uv.plot(uv_index, clear = True,pen=(0,0,255))
             #self.plot_uv.plot(uv_power, pen=(255,0,255))
 
-            self.p2_uv_O.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
-            self.p2_uv.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
+            # self.p2_uv_O.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
+            # self.p2_uv.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
+            self.p2_plot_O.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
+            self.p2_plot.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
 
     def historic_plot(self):
         if not self.radioButtonLiveData.isChecked():
@@ -384,6 +390,6 @@ def run(usb_pipe, log_pipe, gui_exit,db_filepath):
 
     app.exec_()
     gui_exit.set()
-    
+
     # Might need to keep log->gui pipe empty here if it causes problems
     #(cf. loggign process keeping usb pipe clear)

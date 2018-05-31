@@ -41,9 +41,11 @@ def run():
     # Set up sqlite3 database on hard drive
     script_dir = os.path.dirname(__file__)
     log_dir = "../logs"
+    db_dir = "../logs/db"
     try:
         os.makedirs(os.path.abspath(os.path.join(script_dir,log_dir)), exist_ok=True)
-        db_filepath = os.path.abspath(os.path.join(script_dir,log_dir,"db/datalogger_db"))
+        os.makedirs(os.path.abspath(os.path.join(script_dir,db_dir)), exist_ok=True)
+        db_filepath = os.path.abspath(os.path.join(script_dir,db_dir,"datalogger_db"))
 
         db = sqlite3.connect(db_filepath,timeout=20)
         cursor = db.cursor()
