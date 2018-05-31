@@ -28,6 +28,8 @@ y_wind = np.array([4,5.7,2.8,6.6,12.9,5.9,3.5,12,1.3,2.1,4.7,2.3,1.6,2])
 z_wind = np.polyfit(x_wind, y_wind, 3)
 f_wind = np.poly1d(z_wind)
 
+SUPPLY_V_ID = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Supply_V")]
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -238,6 +240,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         packet.printout(self.textBrowserTerminal)
         if packet.id in LOG_PCKT_LIST:
             packet.printout(self.textBrowserTerminalLogs)
+            if packet.id == SUPPLY_V_ID:
+                self.lcdNumberBattV.display(packet.payload)
         #self.update_terminal_tab()
 
 
