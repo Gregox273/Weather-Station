@@ -438,6 +438,10 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         cmd = Cmd_Packet(cmd_id)
         self.gui_end.send(cmd)
 
+    def closeEvent(self, event):
+        self.send_cmd("Stop_tx")  # Stop transmitting live data when gui is closed
+        event.accept() # let the window close
+
 
 def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     app = QtGui.QApplication(sys.argv)
@@ -448,7 +452,6 @@ def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     main_window.show()
 
     app.exec_()
-    self.send_cmd("Stop_tx")  # Stop transmitting live data when gui is closed
     gui_exit.set()
 
     # Might need to keep log->gui pipe empty here if it causes problems
