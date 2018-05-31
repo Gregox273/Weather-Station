@@ -1,7 +1,4 @@
 - The other graphs
-- Stop live transmit on gui exit
-- y axis labels
-- Arduino does not reliably respond to commands?
 - Click and drag area to zoom in on graphs
 - Display supply voltage
 

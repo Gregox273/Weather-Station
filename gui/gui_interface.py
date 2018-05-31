@@ -444,6 +444,7 @@ def run(usb_pipe, log_pipe, gui_exit,db_filepath):
     main_window.show()
 
     app.exec_()
+    self.send_cmd("Stop_tx")  # Stop transmitting live data when gui is closed
     gui_exit.set()
 
     # Might need to keep log->gui pipe empty here if it causes problems
