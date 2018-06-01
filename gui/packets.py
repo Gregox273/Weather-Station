@@ -28,11 +28,16 @@ ID_POSITION = 0  # Byte position of log packet ID (zero indexed)
 
 WAKEUP_BYTE = 0xAA  # Command packet prefix
 
+LIGHT_ID = 0x04
+LOW_LIGHT_ID = 0x08
+V_LOW_LIGHT_ID = 0x10
+
+
 LOG_PCKT_LIST = {0x01 :["Temperature", LOG_PCKT_LEN],  # Raw ADC
                  0x02: ["UV", LOG_PCKT_LEN],           # Raw ADC
-                 0x04: ["Light", LOG_PCKT_LEN],        # Raw ADC
-                 0x08: ["Low_Light", LOG_PCKT_LEN],    # Raw ADC
-                 0x10: ["V_Low_Light", LOG_PCKT_LEN],  # Raw ADC
+                 LIGHT_ID: ["Light", LOG_PCKT_LEN],        # Raw ADC
+                 LOW_LIGHT_ID: ["Low_Light", LOG_PCKT_LEN],    # Raw ADC
+                 V_LOW_LIGHT_ID: ["V_Low_Light", LOG_PCKT_LEN],  # Raw ADC
                  0x20: ["Windspeed", LOG_PCKT_LEN],    # Frequency
                  0x40: ["Supply_V", LOG_PCKT_LEN]      # mV
 }  # List of log packets {id: ["Name", length in bytes]}

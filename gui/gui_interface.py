@@ -100,6 +100,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_light_O.setLabel('left', 'Light Intensity', units='lx')
+        # self.plot_light_O.setLogMode(x=False, y=True)
         # self.plot_light_O.setLabel('bottom', 'Timestamp')
 
         self.plot_uv_O = self.graphicsLayoutWidgetUV_O.addPlot(
@@ -125,6 +126,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_light.setLabel('left', 'Light Intensity', units='lx')
+        # self.plot_light.setLogMode(x=False, y=True)
         # self.plot_light.setLabel('bottom', 'Timestamp')
 
         self.plot_uv = self.graphicsLayoutWidgetUV.addPlot(
@@ -134,27 +136,27 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # self.plot_uv.setLabel('bottom', 'Timestamp')
 
         # Second y axis for UV Graphs
-        self.p2_uv_O = pg.ViewBox()
-        self.p2_uv = pg.ViewBox()
-        self.p2_plot_O = pg.PlotCurveItem()
-        self.p2_plot = pg.PlotCurveItem()
-        self.p2_uv_O.addItem(self.p2_plot_O)
-        self.p2_uv.addItem(self.p2_plot)
-        self.plot_uv_O.showAxis('right')
-        self.plot_uv.showAxis('right')
-        self.plot_uv_O.scene().addItem(self.p2_uv_O)
-        self.plot_uv.scene().addItem(self.p2_uv)
-        self.plot_uv_O.getAxis('right').linkToView(self.p2_uv_O)
-        self.plot_uv.getAxis('right').linkToView(self.p2_uv)
-        self.p2_uv_O.setXLink(self.plot_uv_O)
-        self.p2_uv.setXLink(self.plot_uv)
+        # self.p2_uv_O = pg.ViewBox()
+        # self.p2_uv = pg.ViewBox()
+        # self.p2_plot_O = pg.PlotCurveItem()
+        # self.p2_plot = pg.PlotCurveItem()
+        # self.p2_uv_O.addItem(self.p2_plot_O)
+        # self.p2_uv.addItem(self.p2_plot)
+        # self.plot_uv_O.showAxis('right')
+        # self.plot_uv.showAxis('right')
+        # self.plot_uv_O.scene().addItem(self.p2_uv_O)
+        # self.plot_uv.scene().addItem(self.p2_uv)
+        # self.plot_uv_O.getAxis('right').linkToView(self.p2_uv_O)
+        # self.plot_uv.getAxis('right').linkToView(self.p2_uv)
+        # self.p2_uv_O.setXLink(self.plot_uv_O)
+        # self.p2_uv.setXLink(self.plot_uv)
 
-        self.plot_uv_O.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv_O,self.p2_uv_O))
-        self.plot_uv.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv, self.p2_uv))
+        # self.plot_uv_O.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv_O,self.p2_uv_O))
+        # self.plot_uv.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv, self.p2_uv))
 
         # Power axis for UV graphs
-        self.plot_uv_O.setLabel('right', 'UV Power', units="W/m^2")
-        self.plot_uv.setLabel('right', 'UV Power', units="W/m^2")
+        # self.plot_uv_O.setLabel('right', 'UV Power', units="W/m^2")
+        # self.plot_uv.setLabel('right', 'UV Power', units="W/m^2")
 
         # Update thread, don't start yet
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
@@ -325,22 +327,49 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
             # self.p2_uv_O.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
             # self.p2_uv.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
-            self.p2_plot_O.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
-            self.p2_plot.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
+            # self.p2_plot_O.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
+            # self.p2_plot.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
 
     def update_light(self,start,end):
         # Fetch light levels and plot them
-        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
-            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Light")])
+        cmd = 'SELECT id, timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND (id == {i1} OR id == {i2} OR id == {i3})  ORDER BY timestamp ASC'.\
+            format(t_s = start, t_e = end, i1 = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Light")], i2 = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Low_Light")], i3 = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("V_Low_Light")])
         light = self.run_db(cmd)
         if light:
             # If not empty
+            light = [self.convert_light(i) for i in light if self.convert_light(i)]
             light = np.asarray(light)
             light = light.astype(float)
-            #light[:,1] = ((light[:,1]*V_SUPPLY)/(1024.0*TEMP_GAIN))*100.0 - 50.0
 
             self.plot_light_O.plot(light, clear = True,pen=(100,100,0))
             self.plot_light.plot(light, clear = True,pen=(100,100,0))
+
+    def convert_light(self,meas):
+        if meas[2] > 20 and meas[2] < 673:
+            if meas[0] == LIGHT_ID:
+                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # lx
+            elif meas[0] == LOW_LIGHT_ID:
+                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
+            elif meas[0] == V_LOW_LIGHT_ID:
+                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
+        else:
+            return False# if meas[0] == LIGHT_ID:
+        #     if meas[2] > 20 and meas[2] < 673:
+        #
+        #     else:
+        #         return False
+        # elif meas[0] == LOW_LIGHT_ID:
+        #     if meas[2] > 20 and meas[2] < 673:
+        #         return (meas[0],meas[1],(meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # Photocurrent in A
+        #     else:
+        #         return False
+        # elif meas[0 == V_LOW_LIGHT_ID:
+        #     if meas[2] > and meas[2] < :
+        #         return (meas[0],meas[1],(meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # Photocurrent in A
+        #     else:
+        #         return False
+        # else:
+        #     return False
 
     def update_wind(self,start,end):
         # Fetch light levels and plot them
