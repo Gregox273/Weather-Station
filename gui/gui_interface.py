@@ -5,7 +5,7 @@ by friendzis & scls19fr
 and code by Jean-François Fabre & ömer sarı (https://stackoverflow.com/questions/39308042/sqlite3-database-tables-export-in-csv)
 # Code for second axis on UV graphs by lambcutlet (https://stackoverflow.com/questions/48590354/pyqtgraph-plotwidget-multiple-y-axis-plots-in-wrong-area)
 """
-from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt4 import QtCore, QtGui#, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL, QTimer
 from multiprocessing import Pipe, Process
 from .frontend import *
@@ -14,8 +14,8 @@ from .packets import *
 import sys
 import os
 import time
-from timeit import default_timer as timer
-from math import floor
+#from timeit import default_timer as timer
+#from math import floor
 import pyqtgraph as pg
 import datetime
 import sqlite3
