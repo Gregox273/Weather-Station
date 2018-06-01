@@ -1,5 +1,5 @@
 - The other graphs
 - Click and drag area to zoom in on graphs
-- Display supply voltage
+
 
 - Test everything!

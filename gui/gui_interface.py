@@ -88,50 +88,50 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             title='Temperature',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_temp_O.setLabel('left', 'Temperature', units='°C')
-        self.plot_temp_O.setLabel('bottom', 'Timestamp')
+        # self.plot_temp_O.setLabel('bottom', 'Timestamp')
 
         self.plot_wind_O = self.graphicsLayoutWidgetWind_O.addPlot(
             title='Wind Speed',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_wind_O.setLabel('left', 'Wind Speed', units='m/s')
-        self.plot_wind_O.setLabel('bottom', 'Timestamp')
+        # self.plot_wind_O.setLabel('bottom', 'Timestamp')
 
         self.plot_light_O = self.graphicsLayoutWidgetLight_O.addPlot(
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_light_O.setLabel('left', 'Light Intensity', units='lx')
-        self.plot_light_O.setLabel('bottom', 'Timestamp')
+        # self.plot_light_O.setLabel('bottom', 'Timestamp')
 
         self.plot_uv_O = self.graphicsLayoutWidgetUV_O.addPlot(
             title='UV Index',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_uv_O.setLabel('left', 'UV Index')
-        self.plot_uv_O.setLabel('bottom', 'Timestamp')
+        # self.plot_uv_O.setLabel('bottom', 'Timestamp')
 
         # Individual tabs
         self.plot_temp = self.graphicsLayoutWidgetTemp.addPlot(
             title='Temperature',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_temp.setLabel('left', 'Temperature', units='°C')
-        self.plot_temp.setLabel('bottom', 'Timestamp')
+        # self.plot_temp.setLabel('bottom', 'Timestamp')
 
         self.plot_wind = self.graphicsLayoutWidgetWind.addPlot(
             title='Wind Speed',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_wind.setLabel('left', 'Wind Speed', units='m/s')
-        self.plot_wind.setLabel('bottom', 'Timestamp')
+        # self.plot_wind.setLabel('bottom', 'Timestamp')
 
         self.plot_light = self.graphicsLayoutWidgetLight.addPlot(
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_light.setLabel('left', 'Light Intensity', units='lx')
-        self.plot_light.setLabel('bottom', 'Timestamp')
+        # self.plot_light.setLabel('bottom', 'Timestamp')
 
         self.plot_uv = self.graphicsLayoutWidgetUV.addPlot(
             title='UV Index',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_uv.setLabel('left', 'UV Index')
-        self.plot_uv.setLabel('bottom', 'Timestamp')
+        # self.plot_uv.setLabel('bottom', 'Timestamp')
 
         # Second y axis for UV Graphs
         self.p2_uv_O = pg.ViewBox()
@@ -241,7 +241,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         if packet.id in LOG_PCKT_LIST:
             packet.printout(self.textBrowserTerminalLogs)
             if packet.id == SUPPLY_V_ID:
-                self.lcdNumberBattV.display(packet.payload)
+                self.lcdNumberBattV.display(packet.payload/1000)
         #self.update_terminal_tab()
 
 
