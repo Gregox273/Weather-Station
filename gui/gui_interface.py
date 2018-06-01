@@ -11,6 +11,7 @@ from multiprocessing import Pipe, Process
 from .frontend import *
 from .frontend.main_window import Ui_WeatherStation
 from .packets import *
+from .fir_filter import fir_filter
 import sys
 import os
 import time
@@ -185,6 +186,9 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         # SD dump flag
         self.DUMP_IN_PROGRESS = False
 
+        # Filtering flag
+        self.FILTER = True
+
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
 
@@ -299,7 +303,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             temperatures = np.asarray(temperatures)
             temperatures = temperatures.astype(float)
             temperatures[:,1] = ((temperatures[:,1]*V_SUPPLY)/(1024.0*TEMP_GAIN))*100.0 - 50.0
-
+            if self.FILTER:
+                temperatures[:,1] = fir_filter(temperatures[:,1])
             self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
             self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
@@ -315,10 +320,13 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
             uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
             uv_index = uv_vout/(4.3*0.026)
-            uv_power = uv_vout*10000.0/(4.3*113)
+            #uv_power = uv_vout*10000.0/(4.3*113)
             uv_index = np.column_stack((uv_readings[:,0], uv_index))
             #uv_power = np.column_stack((uv_readings[:,0], uv_power))
-            uv_power = np.asarray(uv_power)
+            #uv_power = np.asarray(uv_power)
+
+            if self.FILTER:
+                uv_index[:,1] = fir_filter(uv_index[:,1])
 
             self.plot_uv_O.plot(uv_index, clear = True,pen=(0,0,255))
             #self.plot_uv_O.plot(uv_power, pen=(255,0,255))
@@ -340,6 +348,9 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             light = [self.convert_light(i) for i in light if self.convert_light(i)]
             light = np.asarray(light)
             light = light.astype(float)
+
+            if self.FILTER:
+                light[:,1] = fir_filter(light[:,1])
 
             self.plot_light_O.plot(light, clear = True,pen=(100,100,0))
             self.plot_light.plot(light, clear = True,pen=(100,100,0))
@@ -383,6 +394,9 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             wind[:,1] = f_wind(wind[:,1])  # m/s
             # Set negative values to 0
             wind[:,1] = np.where(wind[:,1] < 0, 0, wind[:,1])
+
+            if self.FILTER:
+                wind[:,1] = fir_filter(wind[:,1])
 
             self.plot_wind_O.plot(wind, clear = True,pen=(0,0,0))
             self.plot_wind.plot(wind, clear = True,pen=(0,0,0))
