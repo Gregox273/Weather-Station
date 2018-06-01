@@ -5,6 +5,7 @@ from numpy import cos, sin, pi, absolute, arange
 from scipy.signal import kaiserord, lfilter, firwin, freqz
 from pylab import figure, clf, plot, xlabel, ylabel, xlim, ylim, title, grid, axes, show
 
+## http://scipy-cookbook.readthedocs.io/items/FIRFilter.html
 
 # Read Temp Data from CSV
 df = pd.read_csv('test.csv')
@@ -12,12 +13,13 @@ temp = df.data
 temp = ((temp*5.0)/(1024*5.0164))*100 - 50
 x = np.asarray(temp)
 
-x = np.concatenate((x,x,x))
+x_f = np.flip(x,0)
+x = np.concatenate((x_f,x,x_f))
 
 # Generate Time Vector
 nsamples = len(x)
 sample_rate = nsamples
-t = arange(nsamples/3) / (sample_rate/3)
+t = arange(nsamples) / (sample_rate)
 
 
 #------------------------------------------------
@@ -33,7 +35,7 @@ nyq_rate = sample_rate / 2.0
 width = (nsamples/20)/nyq_rate
 
 # The desired attenuation in the stop band, in dB.
-ripple_db = 60.0
+ripple_db = 25.0
 
 # Compute the order and Kaiser parameter for the FIR filter.
 N, beta = kaiserord(ripple_db, width)
@@ -57,17 +59,18 @@ delay = 0.5 * (N-1) / sample_rate
 
 figure(1)
 # Plot the original signal.
-#plot(t, x, linewidth=1)
+plot(t, x, linewidth=1)
 # Plot the filtered signal, shifted to compensate for the phase delay.
-#plot(t-delay, filtered_x, 'r-')
+plot(t[N-1:]-delay, filtered_x[N-1:], 'r-')
 # Plot just the "good" part of the filtered signal.  The first N-1
 # samples are "corrupted" by the initial conditions.
-plot(t, filtered_x[int(len(x)/3)+1:int(2*len(x)/3)+1], 'g', linewidth=2)
+plot(t[int((len(x)/3))+N+1:int((len(x)/3))+N+1+len(temp)], filtered_x[int((len(x)/3))+N+1:int((len(x)/3))+N+1+len(temp)], 'g', linewidth=2)
 
 xlabel('t')
 grid(True)
 
-print(len(temp))
-print(len(filtered_x[int(len(x)/3)+1:int(2*len(x)/3)+1]))
 
+print(len(filtered_x[int((len(x)/3))+N+1:int((len(x)/3))+N+1+len(temp)]))
+print(len(temp))
+print(N)
 show()
