@@ -12,10 +12,12 @@ temp = df.data
 temp = ((temp*5.0)/(1024*5.0164))*100 - 50
 x = np.asarray(temp)
 
+x = np.concatenate((x,x,x))
+
 # Generate Time Vector
-nsamples = len(temp)
+nsamples = len(x)
 sample_rate = nsamples
-t = arange(nsamples) / sample_rate
+t = arange(nsamples/3) / (sample_rate/3)
 
 
 #------------------------------------------------
@@ -55,14 +57,17 @@ delay = 0.5 * (N-1) / sample_rate
 
 figure(1)
 # Plot the original signal.
-plot(t, x, linewidth=1)
+#plot(t, x, linewidth=1)
 # Plot the filtered signal, shifted to compensate for the phase delay.
 #plot(t-delay, filtered_x, 'r-')
 # Plot just the "good" part of the filtered signal.  The first N-1
 # samples are "corrupted" by the initial conditions.
-plot(t[N-1:]-delay, filtered_x[N-1:], 'g', linewidth=2)
+plot(t, filtered_x[int(len(x)/3)+1:int(2*len(x)/3)+1], 'g', linewidth=2)
 
 xlabel('t')
 grid(True)
+
+print(len(temp))
+print(len(filtered_x[int(len(x)/3)+1:int(2*len(x)/3)+1]))
 
 show()

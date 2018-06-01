@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.signal import kaiserord, lfilter, firwin, freqz
 from pylab import figure, clf, plot, xlabel, ylabel, xlim, ylim, title, grid, axes, show
 
@@ -9,6 +10,7 @@ def fir_filter(x):
     #------------------------------------------------
 
     # The Spacial Sample Rate.
+    x = np.concatenate((x,x,x))
     nsamples = len(x)
     sample_rate = nsamples
 
@@ -35,5 +37,5 @@ def fir_filter(x):
     # Use lfilter to filter x with the FIR filter.
     filtered_x = lfilter(taps, 1.0, x)
     
-    return filtered_x[N-1:]
+    return filtered_x[int(len(x)/3)+1:int(2*len(x)/3)+1]
 
