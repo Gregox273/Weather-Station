@@ -21,6 +21,9 @@
 #define SD_DUMP         0x87
 #define SD_WIPE         0x88
 
+/* End of Dump */
+#define DUMP_END        0x90
+
 /* LED Pin */
 #define LED_PIN   2
 

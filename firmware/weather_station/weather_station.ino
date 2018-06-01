@@ -168,7 +168,8 @@ void go_to_sleep(uint32_t sleep_time){
 
         /* Check Serial Port for Commands */
         check_commands();
-    
+
+        /* Power Down */
         LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
         num_secs += 1;
     }
