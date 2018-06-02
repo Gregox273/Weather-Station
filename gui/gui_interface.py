@@ -362,31 +362,32 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             self.plot_light.plot(light, clear = True,pen=(100,100,0))
 
     def convert_light(self,meas):
-        if meas[2] > 20 and meas[2] < 673:
-            if meas[0] == LIGHT_ID:
-                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # lx
-            elif meas[0] == LOW_LIGHT_ID:
-                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
-            elif meas[0] == V_LOW_LIGHT_ID:
-                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
-        else:
-            return False# if meas[0] == LIGHT_ID:
-        #     if meas[2] > 20 and meas[2] < 673:
-        #
-        #     else:
-        #         return False
-        # elif meas[0] == LOW_LIGHT_ID:
-        #     if meas[2] > 20 and meas[2] < 673:
-        #         return (meas[0],meas[1],(meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # Photocurrent in A
-        #     else:
-        #         return False
-        # elif meas[0 == V_LOW_LIGHT_ID:
-        #     if meas[2] > and meas[2] < :
-        #         return (meas[0],meas[1],(meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # Photocurrent in A
-        #     else:
-        #         return False
+        # if meas[2] > 20 and meas[2] < 673:
+        #     if meas[0] == LIGHT_ID:
+        #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # lx
+        #     elif meas[0] == LOW_LIGHT_ID:
+        #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
+        #     elif meas[0] == V_LOW_LIGHT_ID:
+        #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
         # else:
         #     return False
+        if meas[0] == LIGHT_ID:
+            if meas[2] > 20:
+                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # lx
+            else:
+                return False
+        elif meas[0] == LOW_LIGHT_ID:
+            if meas[2] > 20 and meas[2] < 673:
+                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
+            else:
+                return False
+        elif meas[0 == V_LOW_LIGHT_ID:
+            if meas[2] < 673:
+                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
+            else:
+                return False
+        else:
+            return False
 
     def update_wind(self,start,end):
         # Fetch light levels and plot them
