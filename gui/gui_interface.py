@@ -381,7 +381,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
                 return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
             else:
                 return False
-        elif meas[0 == V_LOW_LIGHT_ID:
+        elif meas[0] == V_LOW_LIGHT_ID:
             if meas[2] < 673:
                 return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
             else:

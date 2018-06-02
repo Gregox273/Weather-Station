@@ -1,3 +1,5 @@
+"""Based on code by WarrenWeckesser (http://scipy-cookbook.readthedocs.io/items/FIRFilter.html)"""
+
 import numpy as np
 from scipy.signal import kaiserord, lfilter, firwin, freqz
 from pylab import figure, clf, plot, xlabel, ylabel, xlim, ylim, title, grid, axes, show
@@ -8,8 +10,8 @@ def fir_filter(data, strength):
     #------------------------------------------------
     # Create a FIR filter and apply it to x.
     #------------------------------------------------
-        
-    
+
+
     # The Spacial Sample Rate.
     x_f = np.flip(data,0)
     x = np.concatenate((x_f,data,x_f))
@@ -38,13 +40,13 @@ def fir_filter(data, strength):
 
     # Use lfilter to filter x with the FIR filter.
     filtered_x = lfilter(taps, 1.0, x)
-    
+
     print(np.shape(data))
     print(np.shape(filtered_x))
-    
+
     print(int((len(x)/3))+N+1)
     print(int((len(x)/3))+N+1+len(data))
-    
+
     if(int((len(x)/3))+N+1+len(data) > len(filtered_x)):
         print("data")
         return data
