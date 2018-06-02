@@ -41,16 +41,16 @@ def fir_filter(data, strength):
     # Use lfilter to filter x with the FIR filter.
     filtered_x = lfilter(taps, 1.0, x)
 
-    print(np.shape(data))
-    print(np.shape(filtered_x))
-
-    print(int((len(x)/3))+N+1)
-    print(int((len(x)/3))+N+1+len(data))
+    # print(np.shape(data))
+    # print(np.shape(filtered_x))
+    #
+    # print(int((len(x)/3))+N+1)
+    # print(int((len(x)/3))+N+1+len(data))
 
     if(int((len(x)/3))+N+1+len(data) > len(filtered_x)):
-        print("data")
+        #print("data")
         return data
     else:
-        print("filtered")
+        #print("filtered")
         return filtered_x[int((len(x)/3))+N+1:int((len(x)/3))+N+1+len(data)]
 
