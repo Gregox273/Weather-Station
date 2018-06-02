@@ -373,17 +373,17 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         #     return False
         if meas[0] == LIGHT_ID:
             if meas[2] > 20:
-                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # lx
+                return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES + 0.67)  # lx
             else:
                 return False
         elif meas[0] == LOW_LIGHT_ID:
             if meas[2] > 20 and meas[2] < 673:
-                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
+                return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES + 0.67)  # lx
             else:
                 return False
         elif meas[0] == V_LOW_LIGHT_ID:
             if meas[2] < 673:
-                return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
+                return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES) + 0.67)  # lx
             else:
                 return False
         else:
