@@ -307,8 +307,6 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             if filtering > 0:
                 #print("filtering")
                 temperatures[:,1] = fir_filter(temperatures[:,1],filtering)
-            else:
-                #print("not filtering")
             self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
             self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
 
