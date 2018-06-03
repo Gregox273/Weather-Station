@@ -97,13 +97,12 @@ void dump_sd(void) {
       
       logFile.close();
 
-
-    /* Send End of SD Dump Message */
-    Serial.write(DUMP_END);
-    Serial.write(DUMP_END);
-    Serial.write(DUMP_END);
-    Serial.write(DUMP_END);
-    Serial.write(DUMP_END);
+      /* Send End of SD Dump Message */
+      Serial.write(DUMP_END);
+      Serial.write(DUMP_END);
+      Serial.write(DUMP_END);
+      Serial.write(DUMP_END);
+      Serial.write(DUMP_END);
     }
 }
 

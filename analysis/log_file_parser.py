@@ -27,6 +27,8 @@ UNKNOWN_COMMAND = int("0x84", 0)
 TX_ENABLE = int("0x85", 0)
 TX_DISABLE = int("0x86", 0)
 SD_DUMP = int("0x87", 0)
+SD_WIPE = int("0x88", 0)
+SD_END = int("0x90", 0)
 
 # Nominal Supply Voltage
 v_supply = 5.0
@@ -63,8 +65,13 @@ with open(sys.argv[1], 'rb') as log:
         # Get Message Metadata
         meta_data = struct.unpack('<BI', header)
         log_type = meta_data[0]
-        time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
-                
+        
+        if(log_type == SD_END):
+            i = num_bytes + 10
+            break
+        else:
+            time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
+       
         # Data - Temp
         if(log_type == ID_TEMP):
         
@@ -200,3 +207,11 @@ with open(sys.argv[1], 'rb') as log:
             print(time_stamp, "EVENT - SD_DUMP")
             print(" ")
             i += 5     
+            
+        # Event - SD_WIPE
+        if(log_type == SD_WIPE):
+        
+            print(" ")
+            print(time_stamp, "EVENT - SD_WIPE")
+            print(" ")
+            i += 5  

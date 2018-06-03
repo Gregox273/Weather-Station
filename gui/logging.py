@@ -35,9 +35,9 @@ def handle_sd_dump(db,cursor,usb_pipe):
     flag = False
     cursor.execute('BEGIN TRANSACTION')
     while not flag:
-        for i in range(1,100):
+        for i in range(1,200):
             # Process packets in 100 packet batches
-            if usb_pipe.poll(0.2):
+            if usb_pipe.poll(2):
                 new_pkt = usb_pipe.recv()
                 into_db(new_pkt,db,cursor,commit=False)
                 if new_pkt.id == SD_DUMP_END_ID:
