@@ -28,31 +28,48 @@ ID_POSITION = 0  # Byte position of log packet ID (zero indexed)
 
 WAKEUP_BYTE = 0xAA  # Command packet prefix
 
-LIGHT_ID = 0x04
-LOW_LIGHT_ID = 0x08
-V_LOW_LIGHT_ID = 0x10
+# Data Log IDs
+ID_TEMP = 0x01
+ID_UV = 0x02
+ID_LIGHT = 0x04
+ID_LOW_LIGHT = 0x8
+ID_V_LOW_LIGHT = 0x10
+ID_WIND = 0x20
+ID_VCC = 0x40
+
+# Event Log IDs
+RTC_ERROR = 0x80
+RTC_UPDATE = 0x81
+IDLE_UPDATE = 0x82
+PAYLOAD_ERROR = 0x83
+UNKNOWN_COMMAND = 0x84
+TX_ENABLE = 0x85
+TX_DISABLE = 0x86
+SD_DUMP = 0x87
+SD_WIPE = 0x88
+SD_END = 0x90
 
 
-LOG_PCKT_LIST = {0x01 :["Temperature", LOG_PCKT_LEN],  # Raw ADC
-                 0x02: ["UV", LOG_PCKT_LEN],           # Raw ADC
-                 LIGHT_ID: ["Light", LOG_PCKT_LEN],        # Raw ADC
-                 LOW_LIGHT_ID: ["Low_Light", LOG_PCKT_LEN],    # Raw ADC
-                 V_LOW_LIGHT_ID: ["V_Low_Light", LOG_PCKT_LEN],  # Raw ADC
-                 0x20: ["Windspeed", LOG_PCKT_LEN],    # Frequency
-                 0x40: ["Supply_V", LOG_PCKT_LEN]      # mV
+LOG_PCKT_LIST = {ID_TEMP :["Temperature", LOG_PCKT_LEN],  # Raw ADC
+                 ID_UV: ["UV", LOG_PCKT_LEN],           # Raw ADC
+                 ID_LIGHT: ["Light", LOG_PCKT_LEN],        # Raw ADC
+                 ID_LOW_LIGHT: ["Low_Light", LOG_PCKT_LEN],    # Raw ADC
+                 ID_V_LOW_LIGHT: ["V_Low_Light", LOG_PCKT_LEN],  # Raw ADC
+                 ID_WIND: ["Windspeed", LOG_PCKT_LEN],    # Frequency
+                 ID_VCC: ["Supply_V", LOG_PCKT_LEN]      # mV
 }  # List of log packets {id: ["Name", length in bytes]}
 log_pckt_names = [i[0] for i in list(LOG_PCKT_LIST.values())]
 
-EVENT_PCKT_LIST = { 0x80: ["RTC_Error", EVENT_PCKT_LEN],        # Communication with DS1307 failed
-                    0x81: ["RTC_Update", EVENT_PCKT_LEN],       # RTC Time updated
-                    0x82: ["Idle_Update", EVENT_PCKT_LEN],      # Idle time between measurement cycles updated
-                    0x83: ["Payload_Error", EVENT_PCKT_LEN],    # Payload of a command couldn't be determined
-                    0x84: ["Unknown_Command", EVENT_PCKT_LEN],  # Unknown command received
-                    0x85: ["Tx_Enable", EVENT_PCKT_LEN],        # Live transmission of data enabled
-                    0x86: ["Tx_Disable", EVENT_PCKT_LEN],       # Live transmission of data disabled
-                    0x87: ["SD_Dump", EVENT_PCKT_LEN],          # SD card dumped to host computer
-                    0x88: ["SD_Wipe", EVENT_PCKT_LEN],          # SD card wiped
-                    0x90: ["SD_Dump_End", EVENT_PCKT_LEN]       # End of SD dump (TIMESTAMP INVALID!)
+EVENT_PCKT_LIST = { RTC_ERROR: ["RTC_Error", EVENT_PCKT_LEN],        # Communication with DS1307 failed
+                    RTC_UPDATE: ["RTC_Update", EVENT_PCKT_LEN],       # RTC Time updated
+                    IDLE_UPDATE: ["Idle_Update", EVENT_PCKT_LEN],      # Idle time between measurement cycles updated
+                    PAYLOAD_ERROR: ["Payload_Error", EVENT_PCKT_LEN],    # Payload of a command couldn't be determined
+                    UNKNOWN_COMMAND: ["Unknown_Command", EVENT_PCKT_LEN],  # Unknown command received
+                    TX_ENABLE: ["Tx_Enable", EVENT_PCKT_LEN],        # Live transmission of data enabled
+                    TX_DISABLE: ["Tx_Disable", EVENT_PCKT_LEN],       # Live transmission of data disabled
+                    SD_DUMP: ["SD_Dump", EVENT_PCKT_LEN],          # SD card dumped to host computer
+                    SD_WIPE: ["SD_Wipe", EVENT_PCKT_LEN],          # SD card wiped
+                    SD_END: ["SD_Dump_End", EVENT_PCKT_LEN]       # End of SD dump (TIMESTAMP INVALID!)
 }  # List of event packets {id: ["Name", length in bytes]}
 event_pckt_names = [i[0] for i in list(EVENT_PCKT_LIST.values())]
 

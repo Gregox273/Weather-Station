@@ -29,8 +29,6 @@ y_wind = np.array([4,5.7,2.8,6.6,12.9,5.9,3.5,12,1.3,2.1,4.7,2.3,1.6,2])
 z_wind = np.polyfit(x_wind, y_wind, 3)
 f_wind = np.poly1d(z_wind)
 
-SUPPLY_V_ID = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Supply_V")]
-
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -246,7 +244,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         packet.printout(self.textBrowserTerminal)
         if packet.id in LOG_PCKT_LIST:
             packet.printout(self.textBrowserTerminalLogs)
-            if packet.id == SUPPLY_V_ID:
+            if packet.id == ID_VCC:
                 self.lcdNumberBattV.display(packet.payload/1000)
         #self.update_terminal_tab()
 
@@ -296,7 +294,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     def update_temp(self,start,end):
         # Fetch temperatures and plot them
         cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
-            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Temperature")])
+            format(t_s = start, t_e = end, i = ID_TEMP)
         temperatures = self.run_db(cmd)
         if temperatures:
             # If not empty
@@ -313,7 +311,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     def update_UV(self,start,end):
         # Fetch UV measurements and plot them
         cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
-            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("UV")])
+            format(t_s = start, t_e = end, i = ID_UV)
         uv_readings = self.run_db(cmd)
         if uv_readings:
             # If not empty
@@ -344,7 +342,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     def update_light(self,start,end):
         # Fetch light levels and plot them
         cmd = 'SELECT id, timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND (id == {i1} OR id == {i2} OR id == {i3})  ORDER BY timestamp ASC'.\
-            format(t_s = start, t_e = end, i1 = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Light")], i2 = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Low_Light")], i3 = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("V_Low_Light")])
+            format(t_s = start, t_e = end, i1 = ID_LIGHT, i2 = ID_LOW_LIGHT, i3 = ID_V_LOW_LIGHT)
         light = self.run_db(cmd)
         if light:
             # If not empty
@@ -361,25 +359,25 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
     def convert_light(self,meas):
         # if meas[2] > 20 and meas[2] < 673:
-        #     if meas[0] == LIGHT_ID:
+        #     if meas[0] == ID_LIGHT:
         #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # lx
-        #     elif meas[0] == LOW_LIGHT_ID:
+        #     elif meas[0] == ID_LOW_LIGHT:
         #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
-        #     elif meas[0] == V_LOW_LIGHT_ID:
+        #     elif meas[0] == ID_V_LOW_LIGHT:
         #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
         # else:
         #     return False
-        if meas[0] == LIGHT_ID:
+        if meas[0] == ID_LIGHT:
             if meas[2] > 20:
                 return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES + 0.67)  # lx
             else:
                 return False
-        elif meas[0] == LOW_LIGHT_ID:
+        elif meas[0] == ID_LOW_LIGHT:
             if meas[2] > 20 and meas[2] < 673:
                 return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES + 0.67)  # lx
             else:
                 return False
-        elif meas[0] == V_LOW_LIGHT_ID:
+        elif meas[0] == ID_V_LOW_LIGHT:
             if meas[2] < 673:
                 return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES) + 0.67)  # lx
             else:
@@ -390,7 +388,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
     def update_wind(self,start,end):
         # Fetch light levels and plot them
         cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
-            format(t_s = start, t_e = end, i = list(LOG_PCKT_LIST.keys())[log_pckt_names.index("Windspeed")])
+            format(t_s = start, t_e = end, i = ID_WIND)
         wind = self.run_db(cmd)
         if wind:
             # If not empty

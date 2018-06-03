@@ -6,9 +6,6 @@ import time
 
 script_dir = os.path.dirname(__file__)
 
-SD_DUMP_ID = list(EVENT_PCKT_LIST.keys())[event_pckt_names.index("SD_Dump")]
-SD_DUMP_END_ID = list(EVENT_PCKT_LIST.keys())[event_pckt_names.index("SD_Dump_End")]
-
 def into_db(new_pkt,db,cursor,commit=True):
     try:
         #with db:
@@ -40,7 +37,7 @@ def handle_sd_dump(db,cursor,usb_pipe):
             if usb_pipe.poll(2):
                 new_pkt = usb_pipe.recv()
                 into_db(new_pkt,db,cursor,commit=False)
-                if new_pkt.id == SD_DUMP_END_ID:
+                if new_pkt.id == SD_END:
                     # End of dump
                     flag = True
                     break
@@ -58,7 +55,7 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath):
         # Main loop, add incoming packets to database
         if usb_pipe.poll(0.01):
             new_pkt = usb_pipe.recv()
-            if new_pkt.id == SD_DUMP_ID:
+            if new_pkt.id == SD_DUMP:
                 handle_sd_dump(db,cursor,usb_pipe)
             else:
                 into_db(new_pkt,db,cursor)
