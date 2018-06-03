@@ -67,6 +67,8 @@ class MainThd(QThread):
                 if isinstance(new_packet_window,Usb_command)\
                     or isinstance(new_packet_window, Cmd_Packet):
                         self.usb_pipe.send(new_packet_window)
+                elif new_packet_window == BEGIN_DUMP:
+                    self.log_pipe.send(new_packet_window)
 
 
 class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
@@ -215,6 +217,8 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.dump_in_progress(True)
         cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Request_dump")]
         cmd = Cmd_Packet(cmd_id)
+        self.gui_end.send(BEGIN_DUMP)
+        time.sleep(1) # Give logging process time to prepare for sd dump
         self.gui_end.send(cmd)
 
     def dump_in_progress(self,arg=None):
@@ -320,6 +324,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
             uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
             uv_index = uv_vout/(4.3*0.026)
+            np.clip(uv_index,None,10,out=uv_index)
             #uv_power = uv_vout*10000.0/(4.3*113)
             uv_index = np.column_stack((uv_readings[:,0], uv_index))
             #uv_power = np.column_stack((uv_readings[:,0], uv_power))

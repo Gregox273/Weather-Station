@@ -114,6 +114,8 @@ def run(gui_pipe, log_pipe, gui_exit):
                     if ser.is_open:
                         ser.write(cmd.to_binary())
             if ser.is_open:
+                if int(ser.in_waiting) > 4094:
+                    print("USB buffer full!")
                 byte_in = ser.read()
                 if not byte_in:
                     # Timeout, clear buffer and continue while loop
@@ -167,28 +169,5 @@ def run(gui_pipe, log_pipe, gui_exit):
                             BUF_LEN = None
                             BUF_LOG = None
 
-                #         if id in LOG_PCKT_LIST:
-                #             length = LOG_PCKT_LIST.get(id)[1]
-                #             if len(serial_buffer) >= length:
-                #                 message = Log_Packet.construct(serial_buffer[0:length])
-                #                 #gui_pipe.send(message)
-                #                 if gui_exit.is_set():
-                #                     break  # End process
-                #                 else:
-                #                     log_pipe.send(message)
-                #                 serial_buffer = bytearray()  # Clear buffer
-                #         elif id in EVENT_PCKT_LIST:
-                #             length = EVENT_PCKT_LIST.get(id)[1]
-                #             if len(serial_buffer) >= length:
-                #                 message = Event_Packet.construct(serial_buffer[0:length])
-                #                 #gui_pipe.send(message)
-                #                 if gui_exit.is_set():
-                #                     break  # End process
-                #                 else:
-                #                     log_pipe.send(message)
-                #                 serial_buffer = bytearray()  # Clear buffer
-                #         else:
-                #             # Unrecognised packet, empty buffer
-                #             serial_buffer = bytearray()
             else:
                 time.sleep(0.1)

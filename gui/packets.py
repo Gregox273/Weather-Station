@@ -202,6 +202,8 @@ class Idle_Time_Packet(Cmd_Packet):
         return self.packed_bytes
 
 ############ Internal to ground station ############
+BEGIN_DUMP = 1
+
 class Usb_command(object):
     """Command (from GUI to USB process) to enable/disable serial connection"""
     def __init__(self,conn):
