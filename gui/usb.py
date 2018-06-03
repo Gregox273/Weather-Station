@@ -83,8 +83,7 @@ def run(gui_pipe, log_pipe, gui_exit):
         while not gui_exit.is_set():
             time.sleep(0.5)
     else:
-        ser = serial.Serial(port = args.port, baudrate = args.baud, write_timeout = 0, timeout = 800/args.baud)  # Open serial port
-        # timeout is time taken to send 100 bytes at baudrate
+        ser = serial.Serial(port = args.port, baudrate = args.baud, write_timeout = 0, timeout = 0.05)  # Open serial port
         time.sleep(3)  # Give arduino time to reset
         if args.debug:
             print("Debug mode activated, incoming serial:")
@@ -93,6 +92,10 @@ def run(gui_pipe, log_pipe, gui_exit):
             out = open('session_log.bin','wb')
 
         serial_buffer = bytearray()
+
+        BUF_ID = None
+        BUF_LEN = None
+        BUF_LOG = None  # True if log, false if event
 
         while not gui_exit.is_set():
             # Main loop
@@ -115,6 +118,9 @@ def run(gui_pipe, log_pipe, gui_exit):
                 if not byte_in:
                     # Timeout, clear buffer and continue while loop
                     serial_buffer = bytearray()
+                    BUF_ID = None
+                    BUF_LEN = None
+                    BUF_LOG = None
                     continue
                 if args.debug:
                     # In debug mode, print incoming bytes to terminal
@@ -124,31 +130,65 @@ def run(gui_pipe, log_pipe, gui_exit):
                     print(byte_in)
                 else:
                     serial_buffer.extend(byte_in)
-                    if len(serial_buffer) > ID_POSITION:
+                    if len(serial_buffer) > ID_POSITION and BUF_ID == None:
                         # Check ID
-                        id = serial_buffer[ID_POSITION]
-                        if id in LOG_PCKT_LIST:
-                            length = LOG_PCKT_LIST.get(id)[1]
-                            if len(serial_buffer) >= length:
-                                message = Log_Packet.construct(serial_buffer[0:length])
-                                #gui_pipe.send(message)
-                                if gui_exit.is_set():
-                                    break  # End process
-                                else:
-                                    log_pipe.send(message)
-                                serial_buffer = bytearray()  # Clear buffer
-                        elif id in EVENT_PCKT_LIST:
-                            length = EVENT_PCKT_LIST.get(id)[1]
-                            if len(serial_buffer) >= length:
-                                message = Event_Packet.construct(serial_buffer[0:length])
-                                #gui_pipe.send(message)
-                                if gui_exit.is_set():
-                                    break  # End process
-                                else:
-                                    log_pipe.send(message)
-                                serial_buffer = bytearray()  # Clear buffer
+                        BUF_ID = serial_buffer[ID_POSITION]
+                        if BUF_ID in LOG_PCKT_LIST:
+                            BUF_LEN = LOG_PCKT_LIST[id][1]
+                            BUF_LOG = True
+                        elif BUF_ID in EVENT_PCKT_LIST:
+                            BUF_LEN = EVENT_PCKT_LIST[id][1]
+                            BUF_LOG = False
                         else:
-                            # Unrecognised packet, empty buffer
+                            # Unrecognised packet, clear the buffer
                             serial_buffer = bytearray()
+                            BUF_ID = None
+                            BUF_LEN = None
+                            BUF_LOG = None
+
+                    if BUF_LEN:
+                        if len(serial_buffer) >= BUF_LEN:
+                            if BUF_LOG:
+                                # Log packet
+                                message = Log_Packet.construct(serial_buffer[0:BUF_LEN])
+
+                            elif BUF_LOG == False:
+                                # Event packet
+                                message = Event_Packet.construct(serial_buffer[0:BUF_LEN])
+
+                            if gui_exit.is_set():
+                                break  # End process
+                            else:
+                                log_pipe.send(message)
+
+                            # Clear buffer
+                            serial_buffer = bytearray()
+                            BUF_ID = None
+                            BUF_LEN = None
+                            BUF_LOG = None
+
+                #         if id in LOG_PCKT_LIST:
+                #             length = LOG_PCKT_LIST.get(id)[1]
+                #             if len(serial_buffer) >= length:
+                #                 message = Log_Packet.construct(serial_buffer[0:length])
+                #                 #gui_pipe.send(message)
+                #                 if gui_exit.is_set():
+                #                     break  # End process
+                #                 else:
+                #                     log_pipe.send(message)
+                #                 serial_buffer = bytearray()  # Clear buffer
+                #         elif id in EVENT_PCKT_LIST:
+                #             length = EVENT_PCKT_LIST.get(id)[1]
+                #             if len(serial_buffer) >= length:
+                #                 message = Event_Packet.construct(serial_buffer[0:length])
+                #                 #gui_pipe.send(message)
+                #                 if gui_exit.is_set():
+                #                     break  # End process
+                #                 else:
+                #                     log_pipe.send(message)
+                #                 serial_buffer = bytearray()  # Clear buffer
+                #         else:
+                #             # Unrecognised packet, empty buffer
+                #             serial_buffer = bytearray()
             else:
-                time.sleep(0.2)
+                time.sleep(0.1)
