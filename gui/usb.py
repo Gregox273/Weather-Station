@@ -134,10 +134,10 @@ def run(gui_pipe, log_pipe, gui_exit):
                         # Check ID
                         BUF_ID = serial_buffer[ID_POSITION]
                         if BUF_ID in LOG_PCKT_LIST:
-                            BUF_LEN = LOG_PCKT_LIST[id][1]
+                            BUF_LEN = LOG_PCKT_LIST[BUF_ID][1]
                             BUF_LOG = True
                         elif BUF_ID in EVENT_PCKT_LIST:
-                            BUF_LEN = EVENT_PCKT_LIST[id][1]
+                            BUF_LEN = EVENT_PCKT_LIST[BUF_ID][1]
                             BUF_LOG = False
                         else:
                             # Unrecognised packet, clear the buffer
