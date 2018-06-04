@@ -73,12 +73,19 @@ EVENT_PCKT_LIST = { RTC_ERROR: ["RTC_Error", EVENT_PCKT_LEN],        # Communica
 }  # List of event packets {id: ["Name", length in bytes]}
 event_pckt_names = [i[0] for i in list(EVENT_PCKT_LIST.values())]
 
-CMD_PCKT_LIST = { 0x11: ["Request_dump", 2],     # Request sd card data dump
-                  0x81: ["Start_tx", 2],         # Start sending live sensor data
-                  0x18: ["Stop_tx", 2],          # Stop sending lve sensor data
-                  0x88: ["RTC_update", 6],       # Current unix time in s
-                  0x44: ["Idle_time_update", 6], # Desired idle time in us
-                  0x28: ["SD_Wipe",2]            # Wipe the SD card
+REQUEST_DUMP = 0x11
+START_TX = 0x81
+STOP_TX = 0x18
+RTC_UPDATE_CMD = 0x88
+IDLE_UPDATE_CMD = 0x44
+SD_WIPE_CMD = 0x28
+
+CMD_PCKT_LIST = { REQUEST_DUMP: ["Request_dump", 2],     # Request sd card data dump
+                  START_TX: ["Start_tx", 2],         # Start sending live sensor data
+                  STOP_TX: ["Stop_tx", 2],          # Stop sending lve sensor data
+                  RTC_UPDATE_CMD: ["RTC_update", 6],       # Current unix time in s
+                  IDLE_UPDATE_CMD: ["Idle_time_update", 6], # Desired idle time in us
+                  SD_WIPE_CMD: ["SD_Wipe",2]            # Wipe the SD card
 }  # List of command packets {id: ["Name", length in bytes]}
 cmd_pckt_names = [i[0] for i in list(CMD_PCKT_LIST.values())]
 

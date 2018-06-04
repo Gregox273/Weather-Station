@@ -215,7 +215,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
     def dump_sd(self):
         self.dump_in_progress(True)
-        cmd_id = list(CMD_PCKT_LIST.keys())[cmd_pckt_names.index("Request_dump")]
+        cmd_id = REQUEST_DUMP
         cmd = Cmd_Packet(cmd_id)
         self.gui_end.send(BEGIN_DUMP)
         time.sleep(1) # Give logging process time to prepare for sd dump

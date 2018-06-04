@@ -28,6 +28,7 @@ def run(gui_pipe, log_pipe, gui_exit):
     args = parser.parse_args()
     if args.file:
         with open(args.file, 'rb') as log:
+            print("Reading file...")
             # Read File
             log.read();
 
@@ -96,6 +97,11 @@ def run(gui_pipe, log_pipe, gui_exit):
         BUF_ID = None
         BUF_LEN = None
         BUF_LOG = None  # True if log, false if event
+
+        if args.debug:
+            # Trigger sd dump
+            cmd = Cmd_Packet(REQUEST_DUMP)
+            ser.write(cmd.to_binary())
 
         while not gui_exit.is_set():
             # Main loop

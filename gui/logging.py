@@ -51,6 +51,7 @@ def handle_sd_dump(db,cursor,usb_pipe, gui_pipe):
                 else:
                     flag = True
                     print("[Timeout!]")
+                    break
 
     print("Adding to database...       ", end=" ", flush=True)
 
