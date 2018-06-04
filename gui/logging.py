@@ -56,16 +56,20 @@ def handle_sd_dump(db,cursor,usb_pipe, gui_pipe):
     print("Adding to database...       ", end=" ", flush=True)
 
     # Now parse the file
-    with open(tmpfile,'ab+') as buffer:
+    parse_file(tmpfile,db,cursor)
+    os.remove(tmpfile)
+    print("[Done!]")
+    print("Running...")
+
+def parse_file(file,db,cursor):
+    with open(file,'ab+') as buffer:
         # File pointer
         i = 0
         num_bytes = buffer.tell()
-
         cursor.execute('BEGIN TRANSACTION')
 
         # Loop until EOF
         while i in range(num_bytes):
-
             # Seek to next log
             buffer.seek(i)
 
@@ -96,14 +100,16 @@ def handle_sd_dump(db,cursor,usb_pipe, gui_pipe):
                 into_db(message,db,cursor,commit=False)
                 #gui_pipe.send(message)
         db.commit()
-    os.remove(tmpfile)
-    print("[Done!]")
-    print("Running...")
 
-
-def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath):
+def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath,args):
     db = sqlite3.connect(db_filepath, timeout=20)
     cursor = db.cursor()
+
+    if args.file:
+        print("Processing file {}".format(args.file))
+        parse_file(args.file,db,cursor)
+        db.close()
+        return
 
     while not gui_exit.is_set():
         # Main loop, add incoming packets to database

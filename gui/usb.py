@@ -7,80 +7,64 @@ from multiprocessing import Pipe
 import struct
 from .packets import *
 import time
-import argparse
 
 
-def run(gui_pipe, log_pipe, gui_exit):
-    # Process arguments
-    parser = argparse.ArgumentParser(description= \
-        'Connect to weather station on given serial port (default /dev/ttyACM0)')
-    parser.add_argument('--port', dest='port', type=str, nargs='?', \
-        default='/dev/ttyACM0', help='Serial port to use')
-
-    parser.add_argument('--baud', dest='baud', type=int, nargs='?', \
-        default=115200, help='Baud rate')
-
-    parser.add_argument("-d", "--debug", help="print incoming serial",
-                    action="store_true")
-
-    parser.add_argument('--file', dest='file', type=str, nargs='?', help='Log file to read')
-
-    args = parser.parse_args()
+def run(gui_pipe, log_pipe, gui_exit, args):
     if args.file:
-        with open(args.file, 'rb') as log:
-            print("Reading file...")
-            # Read File
-            log.read();
-
-            # File pointer
-            i = 0
-            num_bytes = log.tell()
-
-            message = Event_Packet(SD_DUMP,int(round(time.time())))
-            log_pipe.send(message)
-
-            # Loop until EOF
-            while i in range(num_bytes):
-
-                # Seek to next log
-                log.seek(i)
-
-                # Read Metadata
-                header = log.read(5)
-
-                # Get Message Metadata
-                meta_data = struct.unpack('<BI', header)
-                log_type = meta_data[0]
-
-                if(log_type == SD_END):
-                    i = num_bytes + 10
-                    break
-                else:
-                    #time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
-                    time_stamp = meta_data[1]
-
-                if log_type in LOG_PCKT_LIST:
-                    i += 7
-                    payload = log.read(2)
-                    res = struct.unpack('<H', payload)
-                    message = Log_Packet(log_type,time_stamp,res[0])
-                    #gui_pipe.send(message)
-                    if gui_exit.is_set():
-                        break  # End process
-                    else:
-                        log_pipe.send(message)
-                elif log_type in EVENT_PCKT_LIST:
-                    i += 5
-                    message = Event_Packet(log_type,time_stamp)
-                    #gui_pipe.send(message)
-                    if gui_exit.is_set():
-                        break  # End process
-                    else:
-                        log_pipe.send(message)
-
-        message = Event_Packet(SD_END,int(round(time.time())))
-        log_pipe.send(message)
-        print("End of file")
+        # with open(args.file, 'rb') as log:
+        #     print("Reading file...")
+        #     # Read File
+        #     log.read();
+        #
+        #     # File pointer
+        #     i = 0
+        #     num_bytes = log.tell()
+        #
+        #     message = Event_Packet(SD_DUMP,int(round(time.time())))
+        #     log_pipe.send(message)
+        #
+        #     # Loop until EOF
+        #     while i in range(num_bytes):
+        #
+        #         # Seek to next log
+        #         log.seek(i)
+        #
+        #         # Read Metadata
+        #         header = log.read(5)
+        #
+        #         # Get Message Metadata
+        #         meta_data = struct.unpack('<BI', header)
+        #         log_type = meta_data[0]
+        #
+        #         if(log_type == SD_END):
+        #             i = num_bytes + 10
+        #             break
+        #         else:
+        #             #time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
+        #             time_stamp = meta_data[1]
+        #
+        #         if log_type in LOG_PCKT_LIST:
+        #             i += 7
+        #             payload = log.read(2)
+        #             res = struct.unpack('<H', payload)
+        #             message = Log_Packet(log_type,time_stamp,res[0])
+        #             #gui_pipe.send(message)
+        #             if gui_exit.is_set():
+        #                 break  # End process
+        #             else:
+        #                 log_pipe.send(message)
+        #         elif log_type in EVENT_PCKT_LIST:
+        #             i += 5
+        #             message = Event_Packet(log_type,time_stamp)
+        #             #gui_pipe.send(message)
+        #             if gui_exit.is_set():
+        #                 break  # End process
+        #             else:
+        #                 log_pipe.send(message)
+        #
+        # message = Event_Packet(SD_END,int(round(time.time())))
+        # log_pipe.send(message)
+        # print("End of file")
         while not gui_exit.is_set():
             time.sleep(0.5)
     else:
@@ -130,12 +114,12 @@ def run(gui_pipe, log_pipe, gui_exit):
                     BUF_LEN = None
                     BUF_LOG = None
                     continue
-                if args.debug:
-                    # In debug mode, print incoming bytes to terminal
-                    # and also to the session log file
-                    #print(byte_in.decode('utf-8'), end='')
-                    out.write(byte_in)
-                    print(byte_in)
+                # if args.debug:
+                #     # In debug mode, print incoming bytes to terminal
+                #     # and also to the session log file
+                #     #print(byte_in.decode('utf-8'), end='')
+                #     out.write(byte_in)
+                #     print(byte_in)
                 else:
                     serial_buffer.extend(byte_in)
                     if len(serial_buffer) > ID_POSITION and BUF_ID == None:
@@ -166,6 +150,9 @@ def run(gui_pipe, log_pipe, gui_exit):
 
                             if gui_exit.is_set():
                                 break  # End process
+                            elif args.debug:
+                                out.write(message.data_struct)
+                                print(message.data_struct)
                             else:
                                 log_pipe.send(message)
 
