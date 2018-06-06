@@ -111,9 +111,5 @@ def run():
     gui_process.join()
     print("GUI process ended")
 
-    # if usb_process.is_alive():
-    #     usb_process.terminate()
-    #     usb_process.join()
-
 
     time.sleep(0.2)

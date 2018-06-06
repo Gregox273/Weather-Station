@@ -84,7 +84,6 @@ def parse_file(file,db,cursor):
                 i = num_bytes + 10
                 break
             else:
-                #time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
                 time_stamp = meta_data[1]
 
             if log_type in LOG_PCKT_LIST:
@@ -93,12 +92,10 @@ def parse_file(file,db,cursor):
                 res = struct.unpack('<H', payload)
                 message = Log_Packet(log_type,time_stamp,res[0])
                 into_db(message,db,cursor,commit=False)
-                #gui_pipe.send(message)
             elif log_type in EVENT_PCKT_LIST:
                 i += EVENT_PCKT_LEN
                 message = Event_Packet(log_type,time_stamp)
                 into_db(message,db,cursor,commit=False)
-                #gui_pipe.send(message)
         db.commit()
 
 def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath,args):
@@ -115,12 +112,7 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath,args):
         # Main loop, add incoming packets to database
         if usb_pipe.poll(0.01):
             new_pkt = usb_pipe.recv()
-            # if new_pkt.id in EVENT_PCKT_LIST:
-            #     print(EVENT_PCKT_LIST.get(new_pkt.id)[0])
-            # if new_pkt.id == SD_DUMP:
-            #     handle_sd_dump(db,cursor,usb_pipe)
-            # else:
-            #     into_db(new_pkt,db,cursor)
+            
             into_db(new_pkt,db,cursor)
             gui_pipe.send(new_pkt)
 

@@ -90,23 +90,6 @@ CMD_PCKT_LIST = { REQUEST_DUMP: ["Request_dump", 2],     # Request sd card data 
 cmd_pckt_names = [i[0] for i in list(CMD_PCKT_LIST.values())]
 
 
-# class Log_Packet(object):
-#     """Log packet, containing timestamp, id and sensor reading"""
-#     def __init__(self, input_struct=bytes(LOG_PCKT_LEN)):
-#         self.data_struct = input_struct
-#         meta_data = struct.unpack('<BIH', self.data_struct[0:LOG_PCKT_LEN])
-#         self.id = meta_data[0]  # Identifier, single byte (uint8)
-#         self.timestamp = meta_data[1] # Seconds (UNIX), 4 byte uint
-#         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
-#             strftime('%H:%M:%S %d-%m-%Y')
-#         self.payload = meta_data[2]  # Sensor reading (uint16)
-#
-#     @classmethod
-#     def construct(cls, id, timestamp, payload):
-#     """Construct class by direct field entries"""
-#         packed_bytes = struct.pack('<BIH', id, timestamp, payload)
-#         return cls(packed_bytes)
-
 class Log_Packet(object):
     """Log packet, containing timestamp, id and sensor reading"""
     def __init__(self, id, timestamp, payload, packed=None):
@@ -136,21 +119,6 @@ class Log_Packet(object):
          textbox.insertPlainText("Payload: {}\n\n".format(self.payload))
          textbox.moveCursor(QtGui.QTextCursor.End)
 
-# class Event(object):
-#     """Event packet"""
-#     def __init__(self,input_struct=bytes(EVENT_PCKT_LEN)):
-#         self.data_struct = input_struct
-#         meta_data = struct.unpack('<BI', self.data_struct[0:EVENT_PCKT_LEN])
-#         self.id = meta_data[0]  # Identifier, single byte (uint8)
-#         self.timestamp = meta_data[1] # Seconds (UNIX), 4 byte uint
-#         self.time_date = datetime.datetime.fromtimestamp(self.timestamp).\
-#             strftime('%H:%M:%S %d-%m-%Y')
-#
-#     @classmethod
-#     def construct(cls, id, timestamp):
-#     """Construct class by direct field entries"""
-#         packed_bytes = struct.pack('<BI', id, timestamp)
-#         return cls(packed_bytes)
 
 class Event_Packet(object):
     """Event packet"""

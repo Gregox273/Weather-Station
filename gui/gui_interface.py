@@ -3,7 +3,6 @@ Gregory Brooks(gb510), Matt Coates(mc955) 2018
 Includes gist (https://gist.github.com/friendzis/4e98ebe2cf29c0c2c232)
 by friendzis & scls19fr
 and code by Jean-François Fabre & ömer sarı (https://stackoverflow.com/questions/39308042/sqlite3-database-tables-export-in-csv)
-# Code for second axis on UV graphs by lambcutlet (https://stackoverflow.com/questions/48590354/pyqtgraph-plotwidget-multiple-y-axis-plots-in-wrong-area)
 """
 from PyQt4 import QtCore, QtGui#, QtWebKit
 from PyQt4.QtCore import QThread, SIGNAL, QTimer
@@ -15,8 +14,6 @@ from .fir_filter import fir_filter
 import sys
 import os
 import time
-#from timeit import default_timer as timer
-#from math import floor
 import pyqtgraph as pg
 import datetime
 import sqlite3
@@ -39,6 +36,7 @@ def int2dt(ts):
     return(datetime.datetime.utcfromtimestamp(float(ts)))
 
 class TimeAxisItem(pg.AxisItem):
+    """friendzis & scls19fr"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -89,20 +87,16 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             title='Temperature',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_temp_O.setLabel('left', 'Temperature', units='°C')
-        # self.plot_temp_O.setLabel('bottom', 'Timestamp')
 
         self.plot_wind_O = self.graphicsLayoutWidgetWind_O.addPlot(
             title='Wind Speed',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_wind_O.setLabel('left', 'Wind Speed', units='m/s')
-        # self.plot_wind_O.setLabel('bottom', 'Timestamp')
 
         self.plot_light_O = self.graphicsLayoutWidgetLight_O.addPlot(
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_light_O.setLabel('left', 'Light Intensity', units='lx')
-        # self.plot_light_O.setLogMode(x=False, y=True)
-        # self.plot_light_O.setLabel('bottom', 'Timestamp')
 
         self.plot_uv_O = self.graphicsLayoutWidgetUV_O.addPlot(
             title='UV Index',
@@ -127,37 +121,11 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             title='Light Levels',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_light.setLabel('left', 'Light Intensity', units='lx')
-        # self.plot_light.setLogMode(x=False, y=True)
-        # self.plot_light.setLabel('bottom', 'Timestamp')
 
         self.plot_uv = self.graphicsLayoutWidgetUV.addPlot(
             title='UV Index',
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot_uv.setLabel('left', 'UV Index')
-        # self.plot_uv.setLabel('bottom', 'Timestamp')
-
-        # Second y axis for UV Graphs
-        # self.p2_uv_O = pg.ViewBox()
-        # self.p2_uv = pg.ViewBox()
-        # self.p2_plot_O = pg.PlotCurveItem()
-        # self.p2_plot = pg.PlotCurveItem()
-        # self.p2_uv_O.addItem(self.p2_plot_O)
-        # self.p2_uv.addItem(self.p2_plot)
-        # self.plot_uv_O.showAxis('right')
-        # self.plot_uv.showAxis('right')
-        # self.plot_uv_O.scene().addItem(self.p2_uv_O)
-        # self.plot_uv.scene().addItem(self.p2_uv)
-        # self.plot_uv_O.getAxis('right').linkToView(self.p2_uv_O)
-        # self.plot_uv.getAxis('right').linkToView(self.p2_uv)
-        # self.p2_uv_O.setXLink(self.plot_uv_O)
-        # self.p2_uv.setXLink(self.plot_uv)
-
-        # self.plot_uv_O.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv_O,self.p2_uv_O))
-        # self.plot_uv.vb.sigResized.connect(lambda: self.updateViewsUV(self.plot_uv, self.p2_uv))
-
-        # Power axis for UV graphs
-        # self.plot_uv_O.setLabel('right', 'UV Power', units="W/m^2")
-        # self.plot_uv.setLabel('right', 'UV Power', units="W/m^2")
 
         # Update thread, don't start yet
         thread_end,self.gui_end = Pipe(duplex=False)  # So that QThread and gui don't use same pipe end at same time
@@ -178,40 +146,15 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
         self.actionExport_Database.triggered.connect(self.export_db)
         self.actionConnect.triggered.connect(self.toggle_con)
 
-        #self.tabWidgetSubTerminal.currentChanged.connect(self.update_terminal_tab)
-
         # Add db
         self.db_filepath = db_filepath
 
         # SD dump flag
         self.DUMP_IN_PROGRESS = False
 
-        # Filtering flag
-        #self.FILTER = True
-
         # Start update thread
         self.update_thread.start(QThread.LowPriority)
 
-    # def update_terminal_tab(self):
-    #     if self.tabWidgetSubTerminal.currentIndex() == 1:
-    #         # Log packet tab
-    #             cmd = 'SELECT id, timestamp, payload_16 from log_table WHERE id IN ({log_ids}) ORDER BY timestamp ASC'.format(log_ids=",".join(["?"]*len(LOG_PCKT_LIST.keys())))
-    #             from_db = self.run_db(cmd, list(LOG_PCKT_LIST.keys()))
-    #             for i in from_db:
-    #                 pckt = Log_Packet(i[0],i[1],i[2])
-    #                 pckt.printout(self.textBrowserTerminalLogs)
-    #
-    #     elif self.tabWidgetSubTerminal.currentIndex() == 2:
-    #         # Event packet tab
-    #         cmd = 'SELECT id, timestamp, payload_16 from log_table WHERE id IN ({ev_ids}) ORDER BY timestamp ASC'.format(ev_ids=",".join(["?"]*len(EVENT_PCKT_LIST.keys())))
-    #         from_db = self.run_db(cmd, list(EVENT_PCKT_LIST.keys()))
-    #         for i in from_db:
-    #             pckt = Event_Packet(i[0],i[1],i[2])
-    #             pckt.printout(self.textBrowserTerminalEvents)
-
-    def updateViewsUV(self, graph, p2):
-        p2.setGeometry(graph.vb.sceneBoundingRect())
-        #self.p2_uv.setGeometry(self.plot_uv_O.vb.sceneBoundingRect())
 
     def dump_sd(self):
         self.dump_in_progress(True)
@@ -250,7 +193,6 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             packet.printout(self.textBrowserTerminalLogs)
             if packet.id == ID_VCC:
                 self.lcdNumberBattV.display(packet.payload/1000)
-        #self.update_terminal_tab()
 
 
         if packet.id in EVENT_PCKT_LIST:
@@ -325,24 +267,14 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
             uv_index = uv_vout/(4.3*0.026)
             np.clip(uv_index,None,10,out=uv_index)
-            #uv_power = uv_vout*10000.0/(4.3*113)
             uv_index = np.column_stack((uv_readings[:,0], uv_index))
-            #uv_power = np.column_stack((uv_readings[:,0], uv_power))
-            #uv_power = np.asarray(uv_power)
 
             filtering = self.spinBoxFiltering.value()
             if filtering > 0:
                 uv_index[:,1] = fir_filter(uv_index[:,1],filtering)
 
             self.plot_uv_O.plot(uv_index, clear = True,pen=(0,0,255))
-            #self.plot_uv_O.plot(uv_power, pen=(255,0,255))
             self.plot_uv.plot(uv_index, clear = True,pen=(0,0,255))
-            #self.plot_uv.plot(uv_power, pen=(255,0,255))
-
-            # self.p2_uv_O.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
-            # self.p2_uv.addItem(pg.PlotCurveItem(uv_readings[:,0],uv_power, pen=(255,0,255)))
-            # self.p2_plot_O.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
-            # self.p2_plot.setData(uv_readings[:,0],uv_power, pen=(255,0,255))
 
     def update_light(self,start,end):
         # Fetch light levels and plot them
@@ -363,15 +295,6 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             self.plot_light.plot(light, clear = True,pen=(100,100,0))
 
     def convert_light(self,meas):
-        # if meas[2] > 20 and meas[2] < 673:
-        #     if meas[0] == ID_LIGHT:
-        #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES)  # lx
-        #     elif meas[0] == ID_LOW_LIGHT:
-        #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES)  # lx
-        #     elif meas[0] == ID_V_LOW_LIGHT:
-        #         return (meas[1],10**7 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES))  # lx
-        # else:
-        #     return False
         if meas[0] == ID_LIGHT:
             if meas[2] > 20:
                 return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES + 0.67)  # lx
@@ -440,6 +363,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             pass
 
     def export_db(self):
+        """Based on code by Jean-François Fabre & ömer sarı"""
         conn = sqlite3.connect(self.db_filepath,timeout=20)
         c = conn.cursor()
 
