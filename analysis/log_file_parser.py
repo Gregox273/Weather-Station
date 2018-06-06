@@ -44,7 +44,7 @@ light_res = 995.823
 low_light_res = 32876.6
 
 plot_list = []
-timestamps = []
+plt_stamp = []
 
 
 # Open log file
@@ -74,8 +74,9 @@ with open(sys.argv[1], 'rb') as log:
             i = num_bytes + 10
             break
         else:
-            #time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
-            time_stamp = meta_data[1]
+            time_stamp = datetime.datetime.fromtimestamp(meta_data[1]).strftime('%Y-%m-%d %H:%M:%S')
+            plt_time_stamp = meta_data[1]
+            
         # Data - Temp
         if(log_type == ID_TEMP):
 
@@ -84,7 +85,7 @@ with open(sys.argv[1], 'rb') as log:
             temp = ((res[0]*v_supply)/(1024*temp_gain))*100 - 50
             print(time_stamp, "Temp = %.2f" %temp, "C")
             plot_list.append(temp)
-            timestamps.append(time_stamp)
+            plt_stamp.append(plt_time_stamp)
             i += 7
 
         # Data - UV
@@ -223,5 +224,5 @@ with open(sys.argv[1], 'rb') as log:
             i += 5
 
 
-plt.plot(timestamps, plot_list)
+plt.plot(plt_stamp, plot_list)
 plt.show()
