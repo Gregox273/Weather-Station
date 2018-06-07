@@ -103,16 +103,17 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath,args):
     cursor = db.cursor()
 
     if args.file:
-        print("Processing file {}".format(args.file))
+        print("Processing file {}          ".format(args.file),end='')
         parse_file(args.file,db,cursor)
         db.close()
+        print("[Done!]")
         return
 
     while not gui_exit.is_set():
         # Main loop, add incoming packets to database
         if usb_pipe.poll(0.01):
             new_pkt = usb_pipe.recv()
-            
+
             into_db(new_pkt,db,cursor)
             gui_pipe.send(new_pkt)
 
