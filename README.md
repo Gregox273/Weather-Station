@@ -23,4 +23,4 @@ Optional arguments:
 --port [*serial port name (default /dev/ttyACM0)*]<br>
 --baud [*baudrate (default 115200)*]<br>
 -d *(enables debug mode, where incoming bytes are printed to terminal and saved into a session log file)*<br>
---file [*file to read bytes from, instead of receiving over serial*]
+--file [*file to read bytes from, instead of receiving over serial. session_log and session_log_2 are example files that can be read.*]
