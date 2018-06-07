@@ -75,7 +75,8 @@ def run():
             CREATE TABLE log_table(
                 timestamp INTEGER NOT NULL,
                 id INTEGER(3) NOT NULL,
-                payload_16 SMALLINT);
+                payload_16 SMALLINT,
+                vcc SMALLINT);
         """)
         db.commit()
     except Exception as e:

@@ -239,24 +239,24 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
 
     def update_temp(self,start,end):
         # Fetch temperatures and plot them
-        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
+        cmd = 'SELECT timestamp, payload_16, vcc from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
             format(t_s = start, t_e = end, i = ID_TEMP)
         temperatures = self.run_db(cmd)
         if temperatures:
             # If not empty
             temperatures = np.asarray(temperatures)
             temperatures = temperatures.astype(float)
-            temperatures[:,1] = ((temperatures[:,1]*V_SUPPLY)/(1024.0*TEMP_GAIN))*100.0 - 50.0
+            temperatures[:,1] = (np.multiply(temperatures[:,1],temperatures[:,2]/1000)/(1024.0*TEMP_GAIN))*100.0 - 50.0
             filtering = self.spinBoxFiltering.value()
             if filtering > 0:
                 #print("filtering")
                 temperatures[:,1] = fir_filter(temperatures[:,1],filtering)
-            self.plot_temp_O.plot(temperatures, clear = True,pen=(255,0,0))
-            self.plot_temp.plot(temperatures, clear = True,pen=(255,0,0))
+            self.plot_temp_O.plot(temperatures[:,0:2], clear = True,pen=(255,0,0))
+            self.plot_temp.plot(temperatures[:,0:2], clear = True,pen=(255,0,0))
 
     def update_UV(self,start,end):
         # Fetch UV measurements and plot them
-        cmd = 'SELECT timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
+        cmd = 'SELECT timestamp, payload_16, vcc from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND id == {i} ORDER BY timestamp ASC'.\
             format(t_s = start, t_e = end, i = ID_UV)
         uv_readings = self.run_db(cmd)
         if uv_readings:
@@ -264,7 +264,7 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             uv_readings = np.asarray(uv_readings)
             uv_readings = uv_readings.astype(float)
 
-            uv_vout = uv_readings[:,1]*V_SUPPLY/(1024.0*UV_GAIN)
+            uv_vout = np.multiply(uv_readings[:,1],uv_readings[:,2]/1000)/(1024.0*UV_GAIN)
             uv_index = uv_vout/(4.3*0.026)
             np.clip(uv_index,None,10,out=uv_index)
             uv_index = np.column_stack((uv_readings[:,0], uv_index))
@@ -273,12 +273,12 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             if filtering > 0:
                 uv_index[:,1] = fir_filter(uv_index[:,1],filtering)
 
-            self.plot_uv_O.plot(uv_index, clear = True,pen=(0,0,255))
-            self.plot_uv.plot(uv_index, clear = True,pen=(0,0,255))
+            self.plot_uv_O.plot(uv_index[:,0:2], clear = True,pen=(0,0,255))
+            self.plot_uv.plot(uv_index[:,0:2], clear = True,pen=(0,0,255))
 
     def update_light(self,start,end):
         # Fetch light levels and plot them
-        cmd = 'SELECT id, timestamp, payload_16 from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND (id == {i1} OR id == {i2} OR id == {i3})  ORDER BY timestamp ASC'.\
+        cmd = 'SELECT id, timestamp, payload_16, vcc from log_table WHERE timestamp BETWEEN {t_s} AND {t_e} AND (id == {i1} OR id == {i2} OR id == {i3})  ORDER BY timestamp ASC'.\
             format(t_s = start, t_e = end, i1 = ID_LIGHT, i2 = ID_LOW_LIGHT, i3 = ID_V_LOW_LIGHT)
         light = self.run_db(cmd)
         if light:
@@ -291,23 +291,23 @@ class gcs_main_window(QtGui.QMainWindow, Ui_WeatherStation):
             if filtering > 0:
                 light[:,1] = fir_filter(light[:,1],filtering)
 
-            self.plot_light_O.plot(light, clear = True,pen=(100,100,0))
-            self.plot_light.plot(light, clear = True,pen=(100,100,0))
+            self.plot_light_O.plot(light[:,0:2], clear = True,pen=(100,100,0))
+            self.plot_light.plot(light[:,0:2], clear = True,pen=(100,100,0))
 
     def convert_light(self,meas):
         if meas[0] == ID_LIGHT:
             if meas[2] > 20:
-                return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/LIGHT_RES + 0.67)  # lx
+                return (meas[1],13.33*10**6 * np.multiply(meas[2],meas[3]/1000) / (1024 * LIGHT_RES) + 0.67)  # lx
             else:
                 return False
         elif meas[0] == ID_LOW_LIGHT:
             if meas[2] > 20 and meas[2] < 673:
-                return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/LOW_LIGHT_RES + 0.67)  # lx
+                return (meas[1],13.33*10**6 * np.multiply(meas[2],meas[3]/1000) / (1024 * LOW_LIGHT_RES) + 0.67)  # lx
             else:
                 return False
         elif meas[0] == ID_V_LOW_LIGHT:
             if meas[2] < 673:
-                return (meas[1],13.33*10**6 * (meas[2]/1024) * V_SUPPLY/(V_LOW_LIGHT_GAIN*LOW_LIGHT_RES) + 0.67)  # lx
+                return (meas[1],13.33*10**6 * np.multiply(meas[2],meas[3]/1000) / (1024*V_LOW_LIGHT_GAIN*LOW_LIGHT_RES) + 0.67)  # lx
             else:
                 return False
         else:

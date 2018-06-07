@@ -6,13 +6,13 @@ import time
 
 script_dir = os.path.dirname(__file__)
 
-def into_db(new_pkt,db,cursor,commit=True):
+def into_db(new_pkt,db,cursor,LATEST_VCC,commit=True):
     try:
         #with db:
             if new_pkt.id in LOG_PCKT_LIST:
-                cursor.execute('''INSERT INTO log_table(timestamp, id, payload_16)\
-                        VALUES(?,?,?)''',
-                        (new_pkt.timestamp, new_pkt.id,new_pkt.payload))
+                cursor.execute('''INSERT INTO log_table(timestamp, id, payload_16, vcc)\
+                        VALUES(?,?,?,?)''',
+                        (new_pkt.timestamp, new_pkt.id,new_pkt.payload,LATEST_VCC))
                 if commit:
                     db.commit()
 
@@ -62,6 +62,7 @@ def handle_sd_dump(db,cursor,usb_pipe, gui_pipe):
     print("Running...")
 
 def parse_file(file,db,cursor):
+    LATEST_VCC = V_SUPPLY*1000
     with open(file,'ab+') as buffer:
         # File pointer
         i = 0
@@ -91,16 +92,19 @@ def parse_file(file,db,cursor):
                 payload = buffer.read(LOG_PCKT_LEN - EVENT_PCKT_LEN)
                 res = struct.unpack('<H', payload)
                 message = Log_Packet(log_type,time_stamp,res[0])
-                into_db(message,db,cursor,commit=False)
+                if message.id == ID_VCC:
+                    LATEST_VCC = message.payload
+                into_db(message,db,cursor,LATEST_VCC,commit=False)
             elif log_type in EVENT_PCKT_LIST:
                 i += EVENT_PCKT_LEN
                 message = Event_Packet(log_type,time_stamp)
-                into_db(message,db,cursor,commit=False)
+                into_db(message,db,cursor,LATEST_VCC,commit=False)
         db.commit()
 
 def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath,args):
     db = sqlite3.connect(db_filepath, timeout=20)
     cursor = db.cursor()
+    LATEST_VCC = V_SUPPLY*1000
 
     if args.file:
         print("Processing file {}          ".format(args.file),end='')
@@ -113,8 +117,9 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath,args):
         # Main loop, add incoming packets to database
         if usb_pipe.poll(0.01):
             new_pkt = usb_pipe.recv()
-
-            into_db(new_pkt,db,cursor)
+            if new_pkt.id == ID_VCC:
+                LATEST_VCC = new_pkt.payload
+            into_db(new_pkt,db,cursor,LATEST_VCC)
             gui_pipe.send(new_pkt)
 
 
@@ -131,7 +136,9 @@ def run(usb_pipe, gui_pipe, gui_exit, log_dir, db_filepath,args):
 
     while usb_pipe.poll(0.2):
         new_pkt = usb_pipe.recv()
-        into_db(new_pkt,db,cursor,commit=False)
+        if new_pkt.id == ID_VCC:
+            LATEST_VCC = new_pkt.payload
+        into_db(new_pkt,db,cursor,LATEST_VCC,commit=False)
 
     db.commit()
     db.close()
